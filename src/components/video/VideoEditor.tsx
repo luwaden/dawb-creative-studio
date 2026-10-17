@@ -330,6 +330,11 @@ function SceneProperties({ scene, doc, isLast, setScene, setProp, pickImage }: {
           <span className="mb-1 flex justify-between text-xs font-medium text-ink-2"><span>Duration</span><span className="tabular-nums text-muted">{(scene.durationInFrames / doc.fps).toFixed(1)} s</span></span>
           <input type="range" className="w-full" min={1} max={20} step={0.5} value={scene.durationInFrames / doc.fps} onChange={(e) => setScene((s) => ({ ...s, durationInFrames: Math.round(Number(e.target.value) * doc.fps) }), `${scene.id}:dur`)} />
         </label>
+        <Field label="Sound effect at start">
+          <Select value={scene.sfx ?? "none"} onChange={(e) => setScene((s) => ({ ...s, sfx: e.target.value as Scene["sfx"] }))}>
+            {["none", "whoosh", "impact", "click", "pop", "chime", "shimmer", "riser", "glitch"].map((x) => <option key={x} value={x}>{x === "none" ? "None" : x[0].toUpperCase() + x.slice(1)}</option>)}
+          </Select>
+        </Field>
         {!isLast && (
           <div className="grid grid-cols-2 gap-2">
             <Field label="Transition to next">
@@ -370,6 +375,12 @@ function SceneProperties({ scene, doc, isLast, setScene, setProp, pickImage }: {
           <Field label="Texture">
             <Select value={scene.background.texture ?? "none"} onChange={(e) => setBg({ texture: e.target.value as SceneBackground["texture"] })}>
               <option value="none">None</option>
+              <option value="signature">DAWB signature (glow, dots, orbit, grain)</option>
+              <option value="noise">Film grain</option>
+              <option value="dotgrid">Dot grid</option>
+              <option value="halftone">Halftone pulse</option>
+              <option value="contours">Contour lines</option>
+              <option value="orbits">Dotted orbits</option>
               <option value="grid">Grid</option>
               <option value="dots">Dots</option>
               <option value="lines">Lines</option>
@@ -479,6 +490,7 @@ function VideoSettings({ doc, set, pickAudio }: { doc: VideoDoc; set: (fn: (d: V
           <option value="auto">Auto (recommended)</option>
           <option value="dark">Always dark-background logo</option>
           <option value="light">Always light-background logo</option>
+          <option value="cyan">Always cyan-background logo</option>
           <option value="none">Hide logo</option>
         </Select>
       </Field>

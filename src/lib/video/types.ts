@@ -32,10 +32,17 @@ export interface SceneBackground {
   /** 0–1 dark overlay on top of the background image for legibility */
   overlay: number;
   /** Optional decorative texture drawn over the background */
-  texture?: "none" | "dots" | "grid" | "lines";
+  texture?: TextureKind;
 }
 
+export type TextureKind = "none" | "dots" | "grid" | "lines" | "signature" | "noise" | "dotgrid" | "halftone" | "contours" | "orbits";
+export type SfxName = "whoosh" | "impact" | "click" | "shimmer" | "riser" | "pop" | "chime" | "glitch";
+
 export type SceneType =
+  | "logo-reveal"
+  | "greeting"
+  | "month"
+  | "webinar"
   | "kinetic-title"
   | "photo-hero"
   | "lower-third"
@@ -62,6 +69,8 @@ export interface Scene {
   transition: SceneTransition;
   background: SceneBackground;
   props: SceneProps;
+  /** Optional sound effect played when the scene starts. */
+  sfx?: SfxName | "none";
 }
 
 export interface VideoTheme {
@@ -88,7 +97,7 @@ export interface VideoDoc {
   scenes: Scene[];
   audio?: VideoAudio | null;
   /** "auto" picks the official light or dark logo file to match each scene background. */
-  logo: "auto" | "dark" | "light" | "none";
+  logo: "auto" | "dark" | "light" | "cyan" | "none";
   /** Footer/handle line shown on branded scenes, e.g. "@dawb_learn · www.dawblearn.org" */
   handle: string;
 }

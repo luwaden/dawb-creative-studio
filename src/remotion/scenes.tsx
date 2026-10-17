@@ -1,3 +1,4 @@
+import { NEW_SCENES } from "./scenes2";
 import type { CSSProperties } from "react";
 import { AbsoluteFill, Easing, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import type { Scene, SceneType } from "@/lib/video/types";
@@ -34,7 +35,11 @@ function useOnBg(scene: Scene) {
   const bg = color(scene.background.color);
   const dark = scene.background.imageSrc ? true : isDark(bg);
   const { theme } = useVideoCtx();
-  return { fg: dark ? "#ffffff" : theme.ink, soft: dark ? "rgba(255,255,255,0.78)" : `${theme.ink}b3`, dark, accent: color("$primary"), highlight: color("$accent") };
+  // On brand-cyan backgrounds the teal accent disappears: switch to deep navy / white.
+  const same = (c: string) => !scene.background.imageSrc && c.toLowerCase() === bg.toLowerCase();
+  const accent = same(color("$primary")) ? "#071C24" : color("$primary");
+  const highlight = same(color("$accent")) ? "#FFFFFF" : color("$accent");
+  return { fg: dark ? "#ffffff" : theme.ink, soft: dark ? "rgba(255,255,255,0.78)" : `${theme.ink}b3`, dark, accent, highlight };
 }
 
 export function isDark(hex: string) {
@@ -159,10 +164,10 @@ function LowerThird({ scene }: Props) {
 
 function SpeakerCard({ scene }: Props) {
   const frame = useCurrentFrame();
-  const { u, isLandscape } = useLayout();
+  const { u, isLandscape, isPortrait } = useLayout();
   const c = useOnBg(scene);
   const { theme } = useVideoCtx();
-  const photo = (isLandscape ? 520 : 560) * u;
+  const photo = (isLandscape ? 520 : isPortrait ? 560 : 360) * u;
   const ringR = photo / 2 + 18 * u;
   const circ = 2 * Math.PI * ringR;
   const ring = interpolate(frame, [6, 40], [circ, 0], { ...clamp, easing: Easing.out(Easing.cubic) });
@@ -335,8 +340,8 @@ function Quote({ scene }: Props) {
   return (
     <Background bg={scene.background}>
       <Content>
-        <div style={{ fontFamily: fontStack("Playfair Display"), fontSize: 300 * u, lineHeight: 0.6, height: 150 * u, color: c.accent, transform: `scale(${markP})`, transformOrigin: "left top" }}>“</div>
-        <div style={{ fontFamily: fontStack("Playfair Display"), fontSize: size, lineHeight: 1.25, color: c.fg, fontWeight: 500, maxWidth: isLandscape ? "80%" : "100%" }}>
+        <div style={{ fontFamily: fontStack("Nunito"), fontSize: 300 * u, lineHeight: 0.6, height: 150 * u, color: c.accent, transform: `scale(${markP})`, transformOrigin: "left top" }}>“</div>
+        <div style={{ fontFamily: fontStack("Nunito"), fontSize: size, lineHeight: 1.25, color: c.fg, fontWeight: 500, maxWidth: isLandscape ? "80%" : "100%" }}>
           {words.map((w, i) => (
             <span key={i} style={{ opacity: interpolate(frame - 8 - i * 2, [0, 10], [0.12, 1], clamp) }}>{w} </span>
           ))}
@@ -371,7 +376,7 @@ function Celebration({ scene }: Props) {
           </div>
         )}
         <FadeUp delay={4}>
-          <div style={{ fontFamily: fontStack("Great Vibes"), fontSize: 130 * u, color: c.accent, lineHeight: 1 }}>{str(scene, "eyebrow")}</div>
+          <div style={{ fontFamily: fontStack("Nunito"), fontSize: 130 * u, color: c.accent, lineHeight: 1 }}>{str(scene, "eyebrow")}</div>
         </FadeUp>
         <div style={{ transform: `scale(${interpolate(nameP, [0, 1], [0.6, 1])})`, opacity: Math.min(1, nameP * 1.6) }}>
           <Display size={(str(scene, "name").length > 14 ? 120 : 170) * u} color={c.fg} weight={900} style={{ textTransform: "uppercase", marginTop: 10 * u }}>{str(scene, "name")}</Display>
@@ -549,9 +554,9 @@ function Certificate({ scene }: Props) {
           <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: 90 * u }}>
             <LogoChip size={110 * u} onDark={false} style={{ marginBottom: 30 * u }} />
             <FadeUp delay={14}><div style={{ fontFamily: fontStack(theme.bodyFont), fontSize: 28 * u, letterSpacing: 6 * u, textTransform: "uppercase", color: theme.primary, fontWeight: 700 }}>{str(scene, "eyebrow")}</div></FadeUp>
-            <FadeUp delay={22}><div style={{ fontFamily: fontStack("Great Vibes"), fontSize: (isLandscape ? 120 : 112) * u, color: "#1b1b1b", marginTop: 20 * u, lineHeight: 1.1 }}>{str(scene, "name")}</div></FadeUp>
+            <FadeUp delay={22}><div style={{ fontFamily: fontStack("Nunito"), fontSize: (isLandscape ? 120 : 112) * u, color: "#1b1b1b", marginTop: 20 * u, lineHeight: 1.1 }}>{str(scene, "name")}</div></FadeUp>
             <DrawLine delay={30} width={420 * u} thickness={2 * u} color={gold} style={{ margin: `${14 * u}px 0 ${24 * u}px` }} />
-            <FadeUp delay={34}><div style={{ fontFamily: fontStack("Playfair Display"), fontSize: 40 * u, color: "#2a2a2a", fontWeight: 600 }}>{str(scene, "achievement")}</div></FadeUp>
+            <FadeUp delay={34}><div style={{ fontFamily: fontStack("Nunito"), fontSize: 40 * u, color: "#2a2a2a", fontWeight: 600 }}>{str(scene, "achievement")}</div></FadeUp>
             <FadeUp delay={40}><div style={{ fontFamily: fontStack(theme.bodyFont), fontSize: 26 * u, color: "#666", marginTop: 16 * u }}>{str(scene, "detail")}</div></FadeUp>
           </div>
         </div>
@@ -586,6 +591,7 @@ function LogoOutro({ scene }: Props) {
 }
 
 export const SCENE_COMPONENTS: Record<SceneType, React.FC<Props>> = {
+  ...NEW_SCENES,
   "kinetic-title": KineticTitle,
   "photo-hero": PhotoHero,
   "lower-third": LowerThird,

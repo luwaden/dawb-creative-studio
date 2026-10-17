@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Upload } from "lucide-react";
 import type { AssetMeta } from "@/lib/projects";
-import { BRAND_LOGOS } from "@/lib/projects";
+import { BRAND_LOGOS, BUILTIN_MUSIC } from "@/lib/projects";
 import { api } from "@/lib/client/api";
 import { markAssetUsed, uploadAsset } from "@/lib/client/upload";
 import { Button, cx, Modal, Spinner, toast } from "@/components/ui";
@@ -81,6 +81,23 @@ export function AssetPicker({ open, onClose, onPick, mode = "image", preferLogos
             ))}
           </div>
           <p className="mt-2 text-[11px] text-muted">These files include their own background. Place them on a matching background, or upload a transparent logo version below.</p>
+        </section>
+      )}
+
+      {mode === "audio" && (
+        <section className="mt-5">
+          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">DAWB music library (royalty-free)</h3>
+          <ul className="divide-y divide-line rounded-md border border-line">
+            {BUILTIN_MUSIC.map((m) => (
+              <li key={m.id} className="flex items-center justify-between gap-3 px-3 py-2">
+                <span className="truncate text-sm">{m.name}</span>
+                <div className="flex items-center gap-2">
+                  <audio src={m.url} controls preload="none" className="h-8 w-48" />
+                  <Button size="sm" onClick={() => choose({ url: m.url, name: m.name })}>Use</Button>
+                </div>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 

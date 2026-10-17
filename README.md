@@ -2,7 +2,14 @@
 
 An internal design and video studio for DAWB Learn: Canva-style editing for carousels and static posts, CapCut-style scene editing for reels and motion graphics, and a template library built from the **From Curiosity to Civilization** campaign calendar (May–August 2025).
 
-- **44 templates**: 29 designs (15 multi-slide carousels, statics, infographics, stories, a LinkedIn header) and 15 videos (10 reels written from the calendar's scene scripts, plus 5 motion graphics).
+- **100+ templates**:
+  - **Logo motion (3, with sound design):** *Assemble* (dark: scan line, emblem draws, facets click in, impact + light sweep), *Signal* (cyan: halftone pulse, glitch-slice lock-in, chime) and *Prism* (white: hexagon wall flips away, 3D rise, typeset letters, shimmer). All are animated from the exact geometry of the three official logo files.
+  - **Beyond The Dashboard (BTD):** 10 flyers (bento, cyan monogram, night terminal, editorial issue, speaker story, tomorrow reminder, panel, live-now story, LinkedIn banner, thank-you recap) and 3 videos (promo reel, speaker announcement, 16:9 starting-soon screen).
+  - **Occasions:** Christmas, New Year, New Month, Happy Birthday and Happy Weekend flyers (16 concepts across white, cyan, dark, emerald, black & gold, warm paper and pastel), each with a matching motion video.
+  - **Campaign calendar:** the 32-post “From Curiosity to Civilization” set (carousels, statics, reels, motion graphics).
+- **Sound:** a built-in, royalty-free library generated in code (`scripts/synth-audio.mjs`): 4 music beds (Pulse, Celebrate, Festive, Ambient) and 8 effects (whoosh, impact, click, pop, chime, shimmer, riser, glitch). Any scene can trigger an effect, and any video can use a bed or an uploaded track.
+- **Texture system:** film grain, dot grids, halftone, topographic contours, dotted orbits/lines, glow, gradients and outlined type, in both the design editor and video scenes.
+- **Brand type:** Nunito Sans and Nunito (self-hosted), with JetBrains Mono for code.
 - **Design editor**: drag, resize, rotate, snap guides, edit text inline or in panels, fonts and colours, photo upload/replace/crop/zoom, shapes, textures, charts, layer order, duplicate, lock, undo/redo, multiple slides, PNG/JPEG export (1× or 2×), and all slides as a ZIP.
 - **Video studio**: a live Remotion preview, a scene timeline (reorder, duplicate, delete, add), per-scene content, duration, transitions, camera motion and textures, aspect presets (9:16, 4:5, 1:1, 16:9), theme colours and fonts, background music, and MP4/WebM export.
 - **Projects**: save, autosave, reopen, duplicate, favourite, delete, conflict protection between teammates, and export history.
@@ -110,6 +117,7 @@ npm run typecheck      # TypeScript
 npm test               # 58 unit tests: every template validates; storage, permissions, conflicts, sniffing, allowlist, timeline
 npm run build          # production build
 npm run render:test    # server-render the sample composition → out/render-test.mp4
+npx tsx scripts/render-template.ts logo-assemble v-btd-promo   # render any video template → out/<id>.mp4
 npm run test:e2e       # against a running app: edit → save → reopen → PNG, ZIP, browser + server video export
 ```
 
@@ -118,7 +126,7 @@ npm run test:e2e       # against a running app: edit → save → reopen → PNG
 ## 5. Notes and limitations
 
 - **Photos.** The calendar asks for photography and historical illustrations that weren't supplied, so photo slots are marked placeholders showing the calendar's suggested image (for example “Ishango Bone photo”). Upload real images in *Brand assets* or straight into a slot. Bracketed fields such as `[Graduate Name]` and `X%` come from the calendar and must be replaced with real details.
-- **Logo files.** The two official SVGs are used exactly as supplied. Each includes its own black or white background square, so templates show them as neat chips. Uploading a transparent logo version is recommended for coloured backgrounds.
+- **Logo files.** The three official SVGs (dark, light, cyan) are used exactly as supplied; each carries its own background square, so templates pick the file that matches the surface (or place it on a badge on other colours). Uploading a transparent logo version is recommended for photos and other colours.
 - **Browser video export** needs Chrome or Edge (WebCodecs). Where H.264 encoding isn't available, it falls back to WebM (VP9). The server export always produces H.264 MP4.
 - **Remotion licence.** Remotion is free for individuals and companies with up to 3 employees; larger organisations need a company licence from remotion.pro. Check this applies to DAWB before wide use.
 - **Not yet built:** real-time co-editing (saves are protected by conflict detection instead), AI-assisted copy and imagery (the app works fully without AI), desktop installer packaging, Google Drive/Sheets integration.

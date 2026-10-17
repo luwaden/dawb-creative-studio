@@ -61,6 +61,33 @@ function commonProps(el: DesignElement, h: NodeHandlers) {
   };
 }
 
+const grainCache = new Map<string, HTMLCanvasElement>();
+/** 256px grain tile; alpha noise in the given colour, intensity from `size` (0.5–10). */
+function grainTile(color: string, size: number): HTMLCanvasElement {
+  const key = `${color}|${size}`;
+  const hit = grainCache.get(key);
+  if (hit) return hit;
+  const cv = document.createElement("canvas");
+  cv.width = cv.height = 256;
+  const ctx = cv.getContext("2d")!;
+  const img = ctx.createImageData(256, 256);
+  const m = /^#?([0-9a-f]{6})/i.exec(color);
+  const n = m ? parseInt(m[1], 16) : 0;
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  let seed = 1337;
+  const amount = Math.min(1, size / 10);
+  for (let i = 0; i < img.data.length; i += 4) {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    img.data[i] = r;
+    img.data[i + 1] = g;
+    img.data[i + 2] = b;
+    img.data[i + 3] = Math.round((seed / 4294967296) * 255 * amount);
+  }
+  ctx.putImageData(img, 0, 0);
+  grainCache.set(key, cv);
+  return cv;
+}
+
 export function withAlpha(color: string, alpha: number): string {
   const m = /^#([0-9a-f]{6})$/i.exec(color);
   if (!m) return color;
@@ -84,12 +111,22 @@ function TextNode({ el, palette, h }: { el: TextElement } & P) {
       fontFamily={el.fontFamily}
       fontSize={el.fontSize}
       fontStyle={fontStyleString(el)}
-      fill={resolveColor(el.fill, palette)}
+      fill={el.gradient?.length ? undefined : resolveColor(el.fill, palette)}
+      {...(el.gradient && el.gradient.length > 1
+        ? {
+            fillLinearGradientStartPoint: { x: 0, y: 0 },
+            fillLinearGradientEndPoint: { x: 0, y: el.fontSize * el.lineHeight * Math.max(1, content.split("\n").length) },
+            fillLinearGradientColorStops: el.gradient.flatMap((c, i, a) => [i / (a.length - 1), resolveColor(c, palette)]),
+          }
+        : {})}
       align={el.align}
       verticalAlign={el.verticalAlign ?? "top"}
       lineHeight={el.lineHeight}
       letterSpacing={el.letterSpacing}
       wrap="word"
+      stroke={el.stroke && (el.strokeWidth ?? 0) > 0 ? resolveColor(el.stroke, palette) : undefined}
+      strokeWidth={el.strokeWidth ?? 0}
+      fillAfterStrokeEnabled
       opacity={h.editingTextId === el.id ? 0 : el.opacity}
     />
   );
@@ -164,7 +201,7 @@ function ImageNode({ el, palette, h }: { el: ImageElement } & P) {
             height={el.height}
             align="center"
             verticalAlign="middle"
-            fontFamily="Inter"
+            fontFamily="Nunito Sans"
             fontStyle="600"
             fontSize={Math.max(14, Math.min(28, Math.min(el.width, el.height) / 12))}
             padding={16}
@@ -240,7 +277,20 @@ function ShapeNode({ el, palette, h }: { el: ShapeElement } & P) {
   const sw = el.strokeWidth;
   const w = el.width;
   const ht = el.height;
-  const shared = { fill, stroke: sw > 0 ? stroke : undefined, strokeWidth: sw, dash: el.dash };
+  const grad = el.gradient && el.gradient.length > 1
+    ? (() => {
+        const a = ((el.gradientAngle ?? 90) * Math.PI) / 180;
+        const dx = (Math.cos(a) * w) / 2;
+        const dy = (Math.sin(a) * ht) / 2;
+        return {
+          fill: undefined,
+          fillLinearGradientStartPoint: { x: w / 2 - dx, y: ht / 2 - dy },
+          fillLinearGradientEndPoint: { x: w / 2 + dx, y: ht / 2 + dy },
+          fillLinearGradientColorStops: el.gradient.flatMap((c, i, arr) => [i / (arr.length - 1), resolveColor(c, palette)]),
+        };
+      })()
+    : {};
+  const shared = { fill, stroke: sw > 0 ? stroke : undefined, strokeWidth: sw, dash: el.dash, lineCap: (el.dotted ? "round" : "butt") as "round" | "butt", ...grad };
   let child: React.ReactNode;
   switch (el.shape) {
     case "ellipse":
@@ -250,10 +300,32 @@ function ShapeNode({ el, palette, h }: { el: ShapeElement } & P) {
       child = (
         <>
           <Rect width={w} height={Math.max(ht, sw, 8)} y={-Math.max(ht, sw, 8) / 2} fill="rgba(0,0,0,0)" />
-          <Line points={[0, 0, w, 0]} stroke={stroke !== "transparent" ? stroke : fill} strokeWidth={Math.max(1, sw)} dash={el.dash} lineCap="butt" />
+          <Line points={[0, 0, w, 0]} stroke={stroke !== "transparent" ? stroke : fill} strokeWidth={Math.max(1, sw)} dash={el.dash} lineCap={el.dotted ? "round" : "butt"} />
         </>
       );
       break;
+    case "hexagon": {
+      // Isometric hexagon — echoes the DAWB emblem's geometry.
+      const pts: number[] = [];
+      for (let i = 0; i < 6; i++) {
+        const a = (Math.PI / 3) * i - Math.PI / 2;
+        pts.push(w / 2 + (w / 2) * Math.cos(a), ht / 2 + (ht / 2) * Math.sin(a));
+      }
+      child = <Line points={pts} closed {...shared} />;
+      break;
+    }
+    case "wave": {
+      const pts: number[] = [];
+      const waves = el.points ?? 6;
+      for (let x = 0; x <= w; x += 6) pts.push(x, ht / 2 + Math.sin((x / w) * Math.PI * 2 * waves) * (ht / 2));
+      child = (
+        <>
+          <Rect width={w} height={ht} fill="rgba(0,0,0,0)" />
+          <Line points={pts} stroke={stroke !== "transparent" ? stroke : fill} strokeWidth={Math.max(1, sw)} dash={el.dash} lineCap="round" lineJoin="round" tension={0.3} />
+        </>
+      );
+      break;
+    }
     case "triangle":
       child = <Line points={[w / 2, 0, w, ht, 0, ht]} closed {...shared} />;
       break;
@@ -269,11 +341,21 @@ function ShapeNode({ el, palette, h }: { el: ShapeElement } & P) {
     }
     case "arc": {
       const r = Math.min(w, ht) / 2;
-      child = <Arc x={w / 2} y={ht / 2} outerRadius={r} innerRadius={r * (el.innerRatio ?? 0.8)} angle={el.angle ?? 270} rotation={-90} {...shared} />;
+      child = <Arc x={w / 2} y={ht / 2} outerRadius={r} innerRadius={r * (el.innerRatio ?? 0.8)} angle={el.angle ?? 270} rotation={-90 + (el.points ?? 0)} {...shared} />;
       break;
     }
     default:
-      child = el.fade ? (
+      child = el.fade === "radial" ? (
+        <Rect
+          width={w}
+          height={ht}
+          fillRadialGradientStartPoint={{ x: w / 2, y: ht / 2 }}
+          fillRadialGradientEndPoint={{ x: w / 2, y: ht / 2 }}
+          fillRadialGradientStartRadius={0}
+          fillRadialGradientEndRadius={Math.max(w, ht) / 2}
+          fillRadialGradientColorStops={[0, withAlpha(fill, 0.9), 0.45, withAlpha(fill, 0.35), 1, withAlpha(fill, 0)]}
+        />
+      ) : el.fade ? (
         <Rect
           width={w}
           height={ht}
@@ -325,6 +407,53 @@ function PatternNode({ el, palette, h }: { el: PatternElement } & P) {
           c.beginPath();
           for (let x = -ht; x < w; x += s) { c.moveTo(x, ht); c.lineTo(x + ht, 0); }
           c.stroke();
+        } else if (el.pattern === "noise") {
+          // Film grain: cached deterministic tile, repeated. Gives print-like texture.
+          const tile = grainTile(color, size);
+          const pat = c.createPattern(tile, "repeat");
+          if (pat) {
+            c.fillStyle = pat;
+            c.fillRect(0, 0, w, ht);
+          }
+        } else if (el.pattern === "dotgrid") {
+          // Dot grid with every 4th dot emphasised — a "graph paper" data motif.
+          for (let y = s / 2, row = 0; y < ht; y += s, row++) for (let x = s / 2, col = 0; x < w; x += s, col++) {
+            const big = row % 4 === 0 && col % 4 === 0;
+            c.globalAlpha = big ? 1 : 0.55;
+            c.beginPath();
+            c.arc(x, y, big ? size * 1.8 : size, 0, Math.PI * 2);
+            c.fill();
+          }
+          c.globalAlpha = 1;
+        } else if (el.pattern === "halftone") {
+          // Halftone: dot radius grows towards the top-right corner of the element.
+          const reach = Math.hypot(w, ht);
+          for (let y = s / 2; y < ht; y += s) for (let x = s / 2; x < w; x += s) {
+            const d = Math.hypot(w - x, y) / reach;
+            const r = (1 - d) * size * 3;
+            if (r < 0.5) continue;
+            c.beginPath();
+            c.arc(x, y, r, 0, Math.PI * 2);
+            c.fill();
+          }
+        } else if (el.pattern === "contours") {
+          // Topographic contour lines around the element's lower-left quarter.
+          const ox = w * 0.3;
+          const oy = ht * 0.7;
+          c.lineWidth = size;
+          for (let k = 1; k * s < Math.hypot(w, ht) * 1.1; k++) {
+            const r = k * s;
+            c.beginPath();
+            for (let i = 0; i <= 72; i++) {
+              const th = (i / 72) * Math.PI * 2;
+              const wob = 1 + 0.09 * Math.sin(th * 3 + k * 0.7) + 0.05 * Math.sin(th * 5 - k * 0.45);
+              const x = ox + Math.cos(th) * r * wob * 1.2;
+              const y = oy + Math.sin(th) * r * wob * 0.85;
+              if (i === 0) c.moveTo(x, y);
+              else c.lineTo(x, y);
+            }
+            c.stroke();
+          }
         } else if (el.pattern === "stars") {
           // Deterministic starfield: same stars every render and export.
           let seed = 0;

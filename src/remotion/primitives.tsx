@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { AbsoluteFill, Easing, Img, interpolate, random, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import type { SceneBackground } from "@/lib/video/types";
+import type { SceneBackground, TextureKind } from "@/lib/video/types";
+import { Contours, DotGrid, DottedOrbit, Glow, Grain, Halftone } from "./fx";
 import { fontStack } from "@/lib/fonts";
 import { useAsset, useColor, useLayout, useVideoCtx } from "./context";
 
@@ -39,10 +40,46 @@ export function Background({ bg, children }: { bg: SceneBackground; children?: R
         </AbsoluteFill>
       )}
       {src && bg.overlay > 0 && <AbsoluteFill style={{ backgroundColor: `rgba(0,0,0,${bg.overlay})` }} />}
-      {bg.texture && bg.texture !== "none" && <Texture kind={bg.texture} />}
+      {bg.texture && bg.texture !== "none" && <RichTexture kind={bg.texture} base={color(bg.color)} />}
       {children}
     </AbsoluteFill>
   );
+}
+
+/** Layered texture system: grain, dot grids, halftone, contours, orbits — or all of them ("signature"). */
+function RichTexture({ kind, base }: { kind: Exclude<TextureKind, "none">; base: string }) {
+  const { width, height, u } = useLayout();
+  const light = isLightColor(base);
+  const ink = light ? "#071C24" : "#FFFFFF";
+  const accent = base.toLowerCase() === "#0097b2" ? "#FFFFFF" : "#0097B2";
+  if (kind === "dots" || kind === "grid" || kind === "lines") return <Texture kind={kind} />;
+  if (kind === "noise") return <Grain opacity={light ? 0.1 : 0.16} dark={!light} />;
+  if (kind === "dotgrid") return <DotGrid color={ink} spacing={40 * u} size={1.5 * u} opacity={0.16} drift={0.1} />;
+  if (kind === "halftone") return <Halftone color={accent} spacing={30 * u} max={11 * u} opacity={0.25} pulse={0.12} />;
+  if (kind === "contours") return <Contours color={accent} opacity={0.22} />;
+  if (kind === "orbits") return (
+    <>
+      <DottedOrbit cx={width * 0.85} cy={height * 0.12} r={420 * u} color={accent} opacity={0.5} dot={4 * u} gap={18 * u} rotate={0.15} />
+      <DottedOrbit cx={width * 0.85} cy={height * 0.12} r={620 * u} color={ink} opacity={0.22} dot={3 * u} gap={14 * u} rotate={-0.1} />
+    </>
+  );
+  // signature: the full DAWB stack
+  return (
+    <>
+      <Glow color={base.toLowerCase() === "#0097b2" ? "#9BEFFF" : "#0097B2"} x={width * 0.88} y={height * 0.08} size={1300 * u} opacity={light ? 0.18 : 0.45} />
+      <DotGrid color={ink} spacing={40 * u} size={1.4 * u} opacity={0.13} drift={0.08} />
+      <DottedOrbit cx={width * 0.88} cy={height * 0.08} r={460 * u} color={accent} opacity={0.45} dot={4 * u} gap={18 * u} rotate={0.12} />
+      <Contours color={accent} opacity={0.12} cx={0.1} cy={0.95} count={9} />
+      <Grain opacity={light ? 0.09 : 0.15} dark={!light} />
+    </>
+  );
+}
+
+function isLightColor(hex: string) {
+  const m = /^#?([0-9a-f]{6})/i.exec(hex);
+  if (!m) return false;
+  const n = parseInt(m[1], 16);
+  return 0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255) > 150;
 }
 
 function Texture({ kind }: { kind: "dots" | "grid" | "lines" }) {
@@ -180,12 +217,12 @@ function renderWords(text: string, isHl: (w: string) => boolean, color: string) 
 }
 
 /** The official logo file, shown on its own background as a neat chip. */
-export function LogoChip({ size, style, onDark }: { size: number; style?: CSSProperties; onDark?: boolean }) {
+export function LogoChip({ size, style, onDark, onCyan }: { size: number; style?: CSSProperties; onDark?: boolean; onCyan?: boolean }) {
   const { doc } = useVideoCtx();
   const asset = useAsset();
   if (doc.logo === "none") return null;
-  const variant = doc.logo === "auto" ? (onDark === false ? "light" : "dark") : doc.logo;
-  const src = asset(variant === "dark" ? "/brand/dawb-logo-dark.svg" : "/brand/dawb-logo-light.svg");
+  const variant = doc.logo === "auto" ? (onCyan ? "cyan" : onDark === false ? "light" : "dark") : doc.logo;
+  const src = asset(`/brand/dawb-logo-${variant}.svg`);
   return <Img src={src!} style={{ width: size, height: size, borderRadius: size * 0.14, display: "block", ...style }} />;
 }
 
@@ -195,8 +232,14 @@ export function Photo({ src, style, circle, radius = 0 }: { src?: string; style?
   const url = asset(src);
   const shape: CSSProperties = { borderRadius: circle ? "50%" : radius, overflow: "hidden" };
   if (!url) {
+    // Visible on any background: translucent disc + a person glyph. Replace with a real photo.
     return (
-      <div style={{ ...shape, background: `repeating-linear-gradient(135deg, ${color("$primary")}22 0 14px, ${color("$primary")}11 14px 28px)`, ...style }} />
+      <div style={{ ...shape, background: "repeating-linear-gradient(135deg, rgba(127,127,127,0.28) 0 14px, rgba(127,127,127,0.16) 14px 28px)", display: "flex", alignItems: "center", justifyContent: "center", ...style }}>
+        <svg viewBox="0 0 24 24" style={{ width: "38%", height: "38%", opacity: 0.55 }} fill="none" stroke={color("$paper") === "#ffffff" ? "#071C24" : "#FFFFFF"} strokeWidth={1.4}>
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8" />
+        </svg>
+      </div>
     );
   }
   return (

@@ -11,14 +11,9 @@ export interface FontOption {
 }
 
 export const FONTS: FontOption[] = [
-  { family: "Space Grotesk", label: "Space Grotesk", weights: [300, 400, 500, 600, 700], category: "sans" },
-  { family: "Inter", label: "Inter", weights: [300, 400, 500, 600, 700, 800], category: "sans" },
-  { family: "Playfair Display", label: "Playfair Display", weights: [400, 500, 600, 700, 800, 900], category: "serif" },
-  { family: "Cormorant Garamond", label: "Cormorant Garamond", weights: [400, 500, 600, 700], category: "serif" },
-  { family: "JetBrains Mono", label: "JetBrains Mono", weights: [400, 500, 700], category: "mono" },
-  { family: "Archivo", label: "Archivo (heavy grotesk)", weights: [400, 500, 600, 700, 800, 900], category: "sans" },
-  { family: "Anton", label: "Anton (condensed)", weights: [400], category: "display" },
-  { family: "Great Vibes", label: "Great Vibes (script)", weights: [400], category: "script" },
+  { family: "Nunito Sans", label: "Nunito Sans (DAWB)", weights: [300, 400, 500, 600, 700, 800, 900], category: "sans" },
+  { family: "Nunito", label: "Nunito (DAWB)", weights: [400, 500, 600, 700, 800, 900], category: "sans" },
+  { family: "JetBrains Mono", label: "JetBrains Mono (code)", weights: [400, 500, 700], category: "mono" },
 ];
 
 export const FONT_FAMILIES = FONTS.map((f) => f.family);

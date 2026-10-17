@@ -11,6 +11,7 @@ import type { Scene, SceneTransition, VideoDoc } from "@/lib/video/types";
 import { effectiveTransitionFrames, getSceneStarts, resolveThemeColor } from "@/lib/video/types";
 import { useAsset, useLayout, VideoCtx } from "./context";
 import { LogoChip } from "./primitives";
+import { Sfx } from "./fx";
 import { isDark, SCENE_COMPONENTS } from "./scenes";
 
 export interface DawbVideoProps extends Record<string, unknown> {
@@ -48,7 +49,7 @@ function BrandBar({ doc, sceneAt }: { doc: VideoDoc; sceneAt: (f: number) => Sce
   const frame = useCurrentFrame();
   const { u, pad } = useLayout();
   const scene = sceneAt(frame);
-  if (!scene || scene.type === "logo-outro" || scene.type === "certificate") return null;
+  if (!scene || scene.type === "logo-outro" || scene.type === "certificate" || scene.type === "logo-reveal") return null;
   const bg = resolveThemeColor(scene.background.color, doc.theme);
   const dark = Boolean(scene.background.imageSrc) || Boolean(scene.props.image && scene.type !== "quote" && scene.type !== "speaker-card" && scene.type !== "celebration" && scene.type !== "split-media") || isDark(bg);
   const color = dark ? "rgba(255,255,255,0.9)" : `${doc.theme.ink}cc`;
@@ -56,7 +57,7 @@ function BrandBar({ doc, sceneAt }: { doc: VideoDoc; sceneAt: (f: number) => Sce
   return (
     <AbsoluteFill style={{ pointerEvents: "none", opacity: o }}>
       <div style={{ position: "absolute", top: pad * 0.55, left: pad * 0.6, right: pad * 0.6, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <LogoChip size={92 * u} onDark={dark} />
+        <LogoChip size={92 * u} onDark={dark} onCyan={!scene.background.imageSrc && bg.toLowerCase() === "#0097b2"} />
         {doc.handle && <div style={{ fontFamily: fontStack(doc.theme.bodyFont), fontSize: 24 * u, fontWeight: 700, color, letterSpacing: 1.5 * u, textAlign: "right" }}>{doc.handle}</div>}
       </div>
     </AbsoluteFill>
@@ -104,6 +105,7 @@ export const DawbVideo: React.FC<DawbVideoProps> = ({ doc, assetBase = "", asset
             const items = [
               <TransitionSeries.Sequence key={scene.id} durationInFrames={scene.durationInFrames}>
                 <Comp scene={scene} />
+                {scene.sfx && scene.sfx !== "none" && <Sfx name={scene.sfx} at={0} volume={0.7} />}
               </TransitionSeries.Sequence>,
             ];
             const tf = effectiveTransitionFrames(doc.scenes, i);

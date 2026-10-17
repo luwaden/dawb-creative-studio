@@ -65,7 +65,7 @@ export function TemplateLibrary() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Templates</h1>
           <p className="mt-1 text-sm text-muted">
-            Built from the <span className="text-ink-2">From Curiosity to Civilization</span> campaign calendar. {ALL_TEMPLATES.length} templates.
+            Logo motion, Beyond The Dashboard, occasions and the <span className="text-ink-2">From Curiosity to Civilization</span> campaign. {ALL_TEMPLATES.length} templates.
           </p>
         </div>
         <div className="relative w-full sm:w-80">

@@ -23,7 +23,7 @@ export const motion05 = {
         scene("list-reveal", { title: "Carved into its surface:", items: [{ text: "Prime number sequences" }, { text: "Doubling patterns" }, { text: "Possible lunar markings" }], numbered: true }, { id: "k2", duration: 150, background: { color: "#F3E5D0" } }),
         scene("kinetic-title", { headline: "This is Africa's first data set.", highlight: "first data set", animation: "mask", align: "center" }, { id: "k3", duration: 105, background: { color: NEAR_BLACK } }),
       ],
-      { theme: { displayFont: "Space Grotesk", bodyFont: "Inter" } },
+      { theme: { displayFont: "Nunito Sans", bodyFont: "Nunito Sans" } },
     ),
 } satisfies VideoTemplate;
 
@@ -46,7 +46,7 @@ export const motion11 = {
         scene("kinetic-title", { headline: "Then research ended it. Forever.", highlight: "Forever.", animation: "rise" }, { id: "l2", duration: 105, background: { color: "#0A0C0D" } }),
         outro("Join the movement — DAWB Cohort 3", "l3", "#0A0C0D"),
       ],
-      { aspect: "feed", theme: { displayFont: "Space Grotesk", bodyFont: "Inter" } },
+      { aspect: "feed", theme: { displayFont: "Nunito Sans", bodyFont: "Nunito Sans" } },
     ),
 } satisfies VideoTemplate;
 
@@ -69,7 +69,7 @@ export const motion12 = {
         scene("kinetic-title", { headline: "The gap is the mission.", highlight: "mission.", animation: "mask", align: "center" }, { id: "n2", duration: 90, background: { color: "#0B1630" } }),
         outro("DAWB is building the researchers Africa needs.", "n3", "#0B1630"),
       ],
-      { aspect: "feed", theme: { displayFont: "Space Grotesk", bodyFont: "Inter", accent: "#E5534B" } },
+      { aspect: "feed", theme: { displayFont: "Nunito Sans", bodyFont: "Nunito Sans", accent: "#E5534B" } },
     ),
 } satisfies VideoTemplate;
 
@@ -94,7 +94,7 @@ export const motion02 = {
         scene("kinetic-title", { headline: "Research wasn't imported to Africa. It was exported FROM Africa.", highlight: "FROM Africa.", animation: "rise" }, { id: "o4", duration: 120, transition: { type: "slide", direction: "from-right" }, background: { color: "#2A1C14" } }),
         outro("We didn't lose that spirit. We're reclaiming it.", "o5"),
       ],
-      { theme: { displayFont: "Playfair Display", bodyFont: "Inter", accent: "#D9A04A" } },
+      { theme: { displayFont: "Nunito", bodyFont: "Nunito Sans", accent: "#D9A04A" } },
     ),
 } satisfies VideoTemplate;
 
@@ -116,7 +116,7 @@ export const motion20 = {
         scene("stat-counter", { title: "With predictive analytics", stats: [{ value: 40, suffix: "%", label: "less crop loss (30–40% in East African trials)" }], note: "" }, { id: "q2", duration: 120, background: { color: "#121C15" } }),
         outro("Train to solve Africa's problems with data.", "q3", "#121C15"),
       ],
-      { aspect: "square", theme: { displayFont: "Space Grotesk", bodyFont: "Inter", accent: "#E3B04B" } },
+      { aspect: "square", theme: { displayFont: "Nunito Sans", bodyFont: "Nunito Sans", accent: "#E3B04B" } },
     ),
 } satisfies VideoTemplate;
 

@@ -44,7 +44,9 @@ export interface Theme {
   body: string;
   quote: string;
   /** which official logo file matches this theme's surfaces */
-  logo: "dark" | "light";
+  logo: "dark" | "light" | "cyan";
+  /** brand tone: drives the signature backdrop */
+  tone: "white" | "cyan" | "dark";
 }
 
 export const paletteLabels = {
@@ -80,13 +82,12 @@ export function header(b: B, t: Theme, opts: { width?: number; top?: number; sca
   const width = opts.width ?? W;
   const top = opts.top ?? 56 * s;
   const els: DesignElement[] = [];
-  const logo = b.logo(t.logo, { x: M * s, y: top, w: 104 * s, name: "Logo" });
-  logo.cornerRadius = 14 * s;
+  const logo = b.logo(t.logo, { x: M * s - 18 * s, y: top - 18 * s, w: 132 * s, name: "Logo" });
   els.push(logo);
   if (opts.handles !== false) {
     els.push(
-      b.text(`${HANDLES.social}  ·  ${HANDLES.pro}`, { x: width - M * s - 520 * s, y: top + 22 * s, w: 520 * s, fontFamily: "Inter", fontSize: 24 * s, fontWeight: 700, fill: "$ink", align: "right", name: "Handles", label: "Social handles" }),
-      b.text(HANDLES.website, { x: width - M * s - 520 * s, y: top + 58 * s, w: 520 * s, fontFamily: "Inter", fontSize: 21 * s, fontWeight: 500, fill: "$muted", align: "right", letterSpacing: 1.5 * s, name: "Website" }),
+      b.text(`${HANDLES.social}  ·  ${HANDLES.pro}`, { x: width - M * s - 520 * s, y: top + 22 * s, w: 520 * s, fontFamily: "Nunito Sans", fontSize: 24 * s, fontWeight: 700, fill: "$ink", align: "right", name: "Handles", label: "Social handles" }),
+      b.text(HANDLES.website, { x: width - M * s - 520 * s, y: top + 58 * s, w: 520 * s, fontFamily: "Nunito Sans", fontSize: 21 * s, fontWeight: 500, fill: "$muted", align: "right", letterSpacing: 1.5 * s, name: "Website" }),
     );
   }
   return els;

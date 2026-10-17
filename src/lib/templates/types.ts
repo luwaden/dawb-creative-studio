@@ -13,7 +13,14 @@ export type CategoryId =
   | "reel"
   | "motion"
   | "story"
-  | "linkedin";
+  | "linkedin"
+  | "logo"
+  | "btd"
+  | "christmas"
+  | "newyear"
+  | "newmonth"
+  | "birthday"
+  | "weekend";
 
 export interface Category {
   id: CategoryId;
@@ -21,6 +28,13 @@ export interface Category {
 }
 
 export const CATEGORIES: Category[] = [
+  { id: "btd", label: "Beyond The Dashboard" },
+  { id: "logo", label: "Logo motion" },
+  { id: "birthday", label: "Happy birthday" },
+  { id: "newmonth", label: "New month" },
+  { id: "weekend", label: "Happy weekend" },
+  { id: "christmas", label: "Christmas" },
+  { id: "newyear", label: "New Year" },
   { id: "carousel", label: "Carousels" },
   { id: "cinematic", label: "Cinematic images" },
   { id: "statement", label: "Statement & manifesto" },

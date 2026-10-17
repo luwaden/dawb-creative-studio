@@ -25,7 +25,7 @@ export function Sheet({ id, width }: { id: string; width: number }) {
     })();
   }, [id, width]);
   return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 12, padding: 12, background: "#888" }} data-done={done ? "1" : "0"} id="sheet">
+    <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", gap: 12, padding: 12, background: "#888" }} data-done={done ? "1" : "0"} id="sheet">
       {imgs.map((s, i) => <img key={i} src={s} width={width} alt="" />)}
     </div>
   );

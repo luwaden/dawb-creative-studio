@@ -24,9 +24,9 @@ export function TemplateCard({ template, slides }: { template: Template; slides?
           <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-ink">{template.name}</p>
           <p className="mt-1 flex items-center gap-1.5 text-[11.5px] text-muted">
             {template.kind === "video" ? <Film size={12} /> : slides && slides > 1 ? <Layers size={12} /> : null}
-            <span>{template.post ? `Post ${template.post}` : "Campaign frame"}</span>
+            <span className="truncate">{template.post ? `Post ${template.post}` : cat}</span>
             <span aria-hidden>·</span>
-            <span className="truncate">{template.kind === "design" && slides && slides > 1 ? `${slides} slides` : cat}</span>
+            <span className="shrink-0">{template.kind === "design" ? (slides && slides > 1 ? `${slides} slides` : "Design") : "Video"}</span>
           </p>
         </div>
       </Link>

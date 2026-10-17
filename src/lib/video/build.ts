@@ -1,5 +1,5 @@
 import { SCENE_DEFINITIONS } from "./scenes";
-import type { AspectId, Scene, SceneBackground, SceneTransition, SceneType, VideoDoc, VideoTheme } from "./types";
+import type { AspectId, Scene, SceneBackground, SceneTransition, SceneType, SfxName, VideoDoc, VideoTheme } from "./types";
 
 let counter = 0;
 
@@ -13,8 +13,8 @@ export const DAWB_THEME: VideoTheme = {
   ink: "#0f1419",
   paper: "#ffffff",
   accent: "#0097b2",
-  displayFont: "Archivo",
-  bodyFont: "Inter",
+  displayFont: "Nunito Sans",
+  bodyFont: "Nunito Sans",
 };
 
 export const DAWB_HANDLE = "@dawb_learn · www.dawblearn.org";
@@ -22,7 +22,7 @@ export const DAWB_HANDLE = "@dawb_learn · www.dawblearn.org";
 export function scene(
   type: SceneType,
   props: Record<string, unknown> = {},
-  opts: { duration?: number; transition?: Partial<SceneTransition>; background?: Partial<SceneBackground>; id?: string } = {},
+  opts: { duration?: number; transition?: Partial<SceneTransition>; background?: Partial<SceneBackground>; id?: string; sfx?: SfxName } = {},
 ): Scene {
   const def = SCENE_DEFINITIONS[type];
   return {
@@ -32,6 +32,7 @@ export function scene(
     transition: { type: "fade", durationInFrames: 15, direction: "from-right", ...opts.transition },
     background: { color: "$paper", motion: "none", overlay: 0, texture: "none", ...opts.background },
     props: { ...def.defaults, ...props },
+    ...(opts.sfx ? { sfx: opts.sfx } : {}),
   };
 }
 

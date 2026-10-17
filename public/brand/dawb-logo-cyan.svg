@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="0 0 500 500">
+
+
+  <rect width="500" height="500" fill="#0097B2"/>
+
+  <!-- DAWB geometric emblem -->
+  <path fill="#FFFFFF"
+    d="M152.5 105.5 230 149.5 230 327.5 114 394.5 37 350 37 216 114 172 114 127.5Z"/>
+
+  <!-- Teal cutouts -->
+  <g fill="#0097B2">
+    <path d="M152.8 149.8 191.3 172 191.3 260.7 152.8 238.4Z"/>
+    <path d="M75.5 238.7 114 216.4 114 260.7 75.5 283Z"/>
+    <path d="M75.5 327.6 152.5 283.2 191.1 305.5 114 350Z"/>
+    <circle cx="210.9" cy="184.2" r="9.8"/>
+    <circle cx="210.9" cy="216.5" r="9.8"/>
+    <circle cx="210.9" cy="252.9" r="9.8"/>
+  </g>
+
+  <!-- DAWB wordmark -->
+  <g font-family="Arial, Helvetica, sans-serif" font-weight="700">
+    <text x="239" y="232" font-size="119"
+      fill="#000000" textLength="101"
+      lengthAdjust="spacingAndGlyphs">D</text>
+
+    <text x="372" y="224" font-size="106"
+      fill="#FFFFFF" textLength="74"
+      lengthAdjust="spacingAndGlyphs">A</text>
+
+    <text x="239" y="326" font-size="108"
+      fill="#FFFFFF" textLength="119"
+      lengthAdjust="spacingAndGlyphs">W</text>
+
+    <text x="370" y="327" font-size="101"
+      fill="#000000" textLength="76"
+      lengthAdjust="spacingAndGlyphs">B</text>
+
+    <circle cx="354.5" cy="237" r="10" fill="#FFFFFF"/>
+  </g>
+</svg>

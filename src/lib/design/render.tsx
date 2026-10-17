@@ -17,7 +17,7 @@ export function collectImageSources(doc: PageView): string[] {
 }
 
 export function collectFonts(doc: PageView) {
-  const specs: Array<{ family: string; weight: number; italic?: boolean }> = [{ family: "Inter", weight: 600 }];
+  const specs: Array<{ family: string; weight: number; italic?: boolean }> = [{ family: "Nunito Sans", weight: 600 }];
   for (const el of doc.elements) {
     if (el.type === "text") specs.push({ family: el.fontFamily, weight: el.fontWeight, italic: el.italic });
     if (el.type === "chart") specs.push({ family: el.fontFamily, weight: 400 }, { family: el.fontFamily, weight: 700 }, { family: el.fontFamily, weight: 800 });

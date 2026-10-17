@@ -177,7 +177,7 @@ export function closing(b: B, t: Theme, c: Copy & { cta: string; counter?: strin
   ];
   if (c.body) els.push(b.text(c.body, { x: M, y: y + hh + 34, w: CW, fontFamily: t.body, fontSize: 30, fill: "$muted", lineHeight: 1.45, label: "Body", name: "Body", multiline: true }));
   els.push(...bar(b, c.cta, { x: M, y: y + hh + bh + 100, w: CW, fontSize: 30, font: t.body, label: "Call to action" }));
-  els.push(b.text("www.dawblearn.org", { x: M, y: H - 90, w: CW, fontFamily: "Inter", fontSize: 24, fontWeight: 700, fill: "$primary", letterSpacing: 2, name: "Website", label: "Website" }));
+  els.push(b.text("www.dawblearn.org", { x: M, y: H - 90, w: CW, fontFamily: "Nunito Sans", fontSize: 24, fontWeight: 700, fill: "$primary", letterSpacing: 2, name: "Website", label: "Website" }));
   if (c.counter) els.push(b.text(c.counter, { x: W - M - 200, y: H - 88, w: 200, fontFamily: "JetBrains Mono", fontSize: 22, fill: "$muted", align: "right", name: "Slide number" }));
   return els;
 }

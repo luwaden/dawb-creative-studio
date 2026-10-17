@@ -39,7 +39,7 @@ export function createBuilder(prefix = "e") {
         ...geo(g),
         type: "text",
         text: content,
-        fontFamily: "Archivo",
+        fontFamily: "Nunito Sans",
         fontSize: 48,
         fontWeight: 400,
         fill: "$ink",
@@ -65,11 +65,11 @@ export function createBuilder(prefix = "e") {
         ...rest,
       };
     },
-    logo(variant: "dark" | "light", g: Geo): ImageElement {
+    logo(variant: "dark" | "light" | "cyan", g: Geo): ImageElement {
       return {
         ...geo({ label: "Logo", name: "DAWB logo", ...g, h: g.h ?? g.w }),
         type: "image",
-        src: variant === "dark" ? "/brand/dawb-logo-dark.svg" : "/brand/dawb-logo-light.svg",
+        src: `/brand/dawb-logo-${variant}.svg`,
         fit: "contain",
         cropZoom: 1,
         cropX: 0,
@@ -112,7 +112,7 @@ export function createBuilder(prefix = "e") {
         labelColor: "$ink",
         showLabels: true,
         showValues: true,
-        fontFamily: "Inter",
+        fontFamily: "Nunito Sans",
         ...rest,
       };
     },

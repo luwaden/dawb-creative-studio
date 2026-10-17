@@ -32,6 +32,9 @@ const text = z.object({
   lineHeight: num.min(0.5).max(4),
   letterSpacing: num.min(-50).max(200),
   uppercase: z.boolean().optional(),
+  stroke: color.optional(),
+  strokeWidth: num.min(0).max(60).optional(),
+  gradient: z.array(color).max(4).optional(),
   multiline: z.boolean().optional(),
 });
 
@@ -56,7 +59,7 @@ const image = z.object({
 const shape = z.object({
   ...base,
   type: z.literal("shape"),
-  shape: z.enum(["rect", "ellipse", "line", "triangle", "star", "ring", "arc"]),
+  shape: z.enum(["rect", "ellipse", "line", "triangle", "star", "ring", "arc", "hexagon", "wave"]),
   fill: color,
   stroke: color,
   strokeWidth: num.min(0),
@@ -65,13 +68,16 @@ const shape = z.object({
   points: num.optional(),
   innerRatio: num.optional(),
   angle: num.optional(),
-  fade: z.enum(["up", "down"]).optional(),
+  fade: z.enum(["up", "down", "radial"]).optional(),
+  dotted: z.boolean().optional(),
+  gradient: z.array(color).max(4).optional(),
+  gradientAngle: num.optional(),
 });
 
 const pattern = z.object({
   ...base,
   type: z.literal("pattern"),
-  pattern: z.enum(["dots", "grid", "diagonal", "waves", "plus", "stars"]),
+  pattern: z.enum(["dots", "grid", "diagonal", "waves", "plus", "stars", "noise", "dotgrid", "halftone", "contours"]),
   color,
   spacing: num.min(4).max(400),
   size: num.min(0.5).max(100),

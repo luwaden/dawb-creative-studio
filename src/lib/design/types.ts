@@ -36,6 +36,11 @@ export interface TextElement extends BaseElement {
   lineHeight: number;
   letterSpacing: number;
   uppercase?: boolean;
+  /** Outline stroke — with a transparent fill this gives outlined display type. */
+  stroke?: ColorValue;
+  strokeWidth?: number;
+  /** Vertical gradient fill (top → bottom), e.g. chrome or gold numerals. */
+  gradient?: ColorValue[];
   /** Multi-line hint for the quick-edit panel. */
   multiline?: boolean;
 }
@@ -63,7 +68,7 @@ export interface ImageElement extends BaseElement {
   hint?: string;
 }
 
-export type ShapeKind = "rect" | "ellipse" | "line" | "triangle" | "star" | "ring" | "arc";
+export type ShapeKind = "rect" | "ellipse" | "line" | "triangle" | "star" | "ring" | "arc" | "hexagon" | "wave";
 
 export interface ShapeElement extends BaseElement {
   type: "shape";
@@ -78,10 +83,15 @@ export interface ShapeElement extends BaseElement {
   innerRatio?: number;
   angle?: number;
   /** Rect only: fade the fill to transparent — "up" is solid at the bottom (legibility over photos). */
-  fade?: "up" | "down";
+  fade?: "up" | "down" | "radial";
+  /** Round dash caps: with dash [0, gap] this draws dotted lines and dotted rings. */
+  dotted?: boolean;
+  /** Linear gradient fill across the shape (2–4 colours) at `gradientAngle` degrees. */
+  gradient?: ColorValue[];
+  gradientAngle?: number;
 }
 
-export type PatternKind = "dots" | "grid" | "diagonal" | "waves" | "plus" | "stars";
+export type PatternKind = "dots" | "grid" | "diagonal" | "waves" | "plus" | "stars" | "noise" | "dotgrid" | "halftone" | "contours";
 
 export interface PatternElement extends BaseElement {
   type: "pattern";

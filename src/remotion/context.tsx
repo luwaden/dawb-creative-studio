@@ -31,7 +31,7 @@ export function useAsset() {
     if (!src) return undefined;
     if (src.startsWith("data:") || /^https?:\/\//.test(src) || src.startsWith("blob:")) return src;
     // Brand files ship in /public: staticFile resolves them in the Next app and in the render bundle.
-    if (src.startsWith("/brand/")) return staticFile(src.slice(1));
+    if (src.startsWith("/brand/") || src.startsWith("/audio/")) return staticFile(src.slice(1));
     const abs = `${assetBase}${src}`;
     if (assetQuery && src.startsWith("/api/assets/")) return `${abs}${abs.includes("?") ? "&" : "?"}${assetQuery}`;
     return abs;

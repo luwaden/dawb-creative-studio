@@ -3,8 +3,8 @@ import type { VideoTheme } from "@/lib/video/types";
 import type { VideoTemplate } from "../types";
 
 const NEAR_BLACK = "#0D1F26";
-const serif: Partial<VideoTheme> = { displayFont: "Playfair Display", bodyFont: "Inter" };
-const grotesk: Partial<VideoTheme> = { displayFont: "Space Grotesk", bodyFont: "Inter" };
+const serif: Partial<VideoTheme> = { displayFont: "Nunito", bodyFont: "Nunito Sans" };
+const grotesk: Partial<VideoTheme> = { displayFont: "Nunito Sans", bodyFont: "Nunito Sans" };
 
 function def(t: Omit<VideoTemplate, "kind" | "aspect"> & { aspect?: VideoTemplate["aspect"] }): VideoTemplate {
   return { kind: "video", aspect: "portrait", ...t };

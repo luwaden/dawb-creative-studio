@@ -25,9 +25,10 @@ export const sceneSchema = z.object({
     imageSrc: z.string().max(2048).optional(),
     motion: z.enum(["none", "zoom-in", "zoom-out", "pan-left", "pan-right"]),
     overlay: z.number().min(0).max(1),
-    texture: z.enum(["none", "dots", "grid", "lines"]).optional(),
+    texture: z.enum(["none", "dots", "grid", "lines", "signature", "noise", "dotgrid", "halftone", "contours", "orbits"]).optional(),
   }),
   props: z.record(z.string().max(40), propValue),
+  sfx: z.enum(["none", "whoosh", "impact", "click", "shimmer", "riser", "pop", "chime", "glitch"]).optional(),
 });
 
 export const videoDocSchema = z.object({
@@ -47,6 +48,6 @@ export const videoDocSchema = z.object({
     .object({ src: z.string().max(2048), name: z.string().max(200), volume: z.number().min(0).max(1), fadeOutFrames: z.number().int().min(0).max(300) })
     .nullable()
     .optional(),
-  logo: z.enum(["auto", "dark", "light", "none"]),
+  logo: z.enum(["auto", "dark", "light", "cyan", "none"]),
   handle: z.string().max(200),
 });

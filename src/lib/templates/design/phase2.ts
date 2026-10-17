@@ -28,7 +28,7 @@ function choleraMap(b: B, x: number, y: number, w: number, h: number): DesignEle
   els.push(
     b.shape("ring", { x: px - 34, y: py - 34, w: 68, h: 68, fill: "$primary", innerRatio: 0.82, name: "Pump ring" }),
     b.shape("ellipse", { x: px - 10, y: py - 10, w: 20, h: 20, fill: "$primary", name: "Broad Street pump" }),
-    b.text("Broad Street pump", { x: px + 44, y: py - 16, w: 300, fontFamily: "Inter", fontSize: 22, fontWeight: 600, fill: "$ink", label: "Map label", name: "Map label" }),
+    b.text("Broad Street pump", { x: px + 44, y: py - 16, w: 300, fontFamily: "Nunito Sans", fontSize: 22, fontWeight: 600, fill: "$ink", label: "Map label", name: "Map label" }),
   );
   return els;
 }
@@ -53,8 +53,8 @@ export const post10 = defineDesign({
         b.rect({ x: 0, y: 560, w: W, h: H - 560, fill: "$paper", fade: "up", name: "Legibility fade" }),
         ...header(b, t),
         b.text("1854", { x: M, y: 820, w: CW, fontFamily: "JetBrains Mono", fontSize: 28, fontWeight: 700, fill: "$primary", letterSpacing: 4, label: "Year", name: "Year" }),
-        b.text("He Stopped an Epidemic With a Map.", { x: M, y: 870, w: CW, fontFamily: "Space Grotesk", fontSize: 92, fontWeight: 700, fill: "$ink", lineHeight: 1.02, letterSpacing: -2, label: "Headline", name: "Headline" }),
-        b.text("The world's first data visualization saved hundreds of lives.", { x: M, y: 1110, w: CW, fontFamily: "Inter", fontSize: 30, fill: "$muted", label: "Subtext", name: "Subtext" }),
+        b.text("He Stopped an Epidemic With a Map.", { x: M, y: 870, w: CW, fontFamily: "Nunito Sans", fontSize: 92, fontWeight: 700, fill: "$ink", lineHeight: 1.02, letterSpacing: -2, label: "Headline", name: "Headline" }),
+        b.text("The world's first data visualization saved hundreds of lives.", { x: M, y: 1110, w: CW, fontFamily: "Nunito Sans", fontSize: 30, fill: "$muted", label: "Subtext", name: "Subtext" }),
         ...footer(b, t, "Swipe →", { counter: "01 / 05" }),
       ],
     },
@@ -63,9 +63,9 @@ export const post10 = defineDesign({
       name: "The map",
       els: [
         ...header(b, t),
-        b.text("He Mapped Every Death. Then He Followed the Pattern.", { x: M, y: 200, w: CW, fontFamily: "Space Grotesk", fontSize: 64, fontWeight: 700, fill: "$ink", lineHeight: 1.05, label: "Headline", name: "Headline" }),
+        b.text("He Mapped Every Death. Then He Followed the Pattern.", { x: M, y: 200, w: CW, fontFamily: "Nunito Sans", fontSize: 64, fontWeight: 700, fill: "$ink", lineHeight: 1.05, label: "Headline", name: "Headline" }),
         ...choleraMap(b, M, 400, CW, 560),
-        b.text("Door by door. Death by death. He plotted each case on a street map of Soho. The clusters pointed to one location: a water pump on Broad Street.", { x: M, y: 1000, w: CW, fontFamily: "Inter", fontSize: 28, fill: "$muted", lineHeight: 1.45, label: "Body", name: "Body" }),
+        b.text("Door by door. Death by death. He plotted each case on a street map of Soho. The clusters pointed to one location: a water pump on Broad Street.", { x: M, y: 1000, w: CW, fontFamily: "Nunito Sans", fontSize: 28, fill: "$muted", lineHeight: 1.45, label: "Body", name: "Body" }),
         ...footer(b, t, "Swipe →", { counter: "03 / 05" }),
       ],
     },
@@ -90,12 +90,12 @@ export const post11 = defineDesign({
       name: "Statement",
       els: [
         ...header(b, t),
-        b.text("Smallpox · 20th century", { x: M, y: 360, w: CW, fontFamily: "Inter", fontSize: 26, fontWeight: 300, fill: "$muted", letterSpacing: 4, uppercase: true, label: "Context", name: "Context" }),
-        b.text("300,000,000", { x: M - 6, y: 420, w: CW + 20, fontFamily: "Space Grotesk", fontSize: 150, fontWeight: 700, fill: "$ink", letterSpacing: -6, label: "Big number", name: "Big number" }),
-        b.text("people killed in the 20th century alone.", { x: M, y: 610, w: CW, fontFamily: "Inter", fontSize: 36, fontWeight: 300, fill: "$muted", label: "Number caption", name: "Number caption" }),
+        b.text("Smallpox · 20th century", { x: M, y: 360, w: CW, fontFamily: "Nunito Sans", fontSize: 26, fontWeight: 300, fill: "$muted", letterSpacing: 4, uppercase: true, label: "Context", name: "Context" }),
+        b.text("300,000,000", { x: M - 6, y: 420, w: CW + 20, fontFamily: "Nunito Sans", fontSize: 150, fontWeight: 700, fill: "$ink", letterSpacing: -6, label: "Big number", name: "Big number" }),
+        b.text("people killed in the 20th century alone.", { x: M, y: 610, w: CW, fontFamily: "Nunito Sans", fontSize: 36, fontWeight: 300, fill: "$muted", label: "Number caption", name: "Number caption" }),
         rule(b, M, 720, 120),
-        b.text("Then research ended it. Forever.", { x: M, y: 770, w: CW, fontFamily: "Space Grotesk", fontSize: 72, fontWeight: 700, fill: "$ink", lineHeight: 1.05, label: "Statement", name: "Statement" }),
-        b.text("Last naturally occurring case: Bangladesh, 1975. Declared eradicated by the WHO in 1979.", { x: M, y: 980, w: CW * 0.8, fontFamily: "Inter", fontSize: 26, fontWeight: 300, fill: "$muted", lineHeight: 1.45, label: "Footnote", name: "Footnote" }),
+        b.text("Then research ended it. Forever.", { x: M, y: 770, w: CW, fontFamily: "Nunito Sans", fontSize: 72, fontWeight: 700, fill: "$ink", lineHeight: 1.05, label: "Statement", name: "Statement" }),
+        b.text("Last naturally occurring case: Bangladesh, 1975. Declared eradicated by the WHO in 1979.", { x: M, y: 980, w: CW * 0.8, fontFamily: "Nunito Sans", fontSize: 26, fontWeight: 300, fill: "$muted", lineHeight: 1.45, label: "Footnote", name: "Footnote" }),
         ...footer(b, t, "Read caption"),
       ],
     },
@@ -118,12 +118,12 @@ export const post12 = defineDesign({
       name: "Cover",
       els: [
         ...header(b, t),
-        b.text("25%", { x: M - 4, y: 230, w: CW, fontFamily: "Space Grotesk", fontSize: 230, fontWeight: 700, fill: "$accent", letterSpacing: -8, label: "Stat 1", name: "Stat 1" }),
-        b.text("of the world's disease burden.", { x: M, y: 470, w: CW, fontFamily: "Space Grotesk", fontSize: 48, fontWeight: 500, fill: "$ink", label: "Stat 1 label", name: "Stat 1 label" }),
-        b.text("<2%", { x: M - 4, y: 600, w: CW, fontFamily: "Space Grotesk", fontSize: 230, fontWeight: 700, fill: "$primary", letterSpacing: -8, label: "Stat 2", name: "Stat 2" }),
-        b.text("of its research.", { x: M, y: 840, w: CW, fontFamily: "Space Grotesk", fontSize: 48, fontWeight: 500, fill: "$ink", label: "Stat 2 label", name: "Stat 2 label" }),
+        b.text("25%", { x: M - 4, y: 230, w: CW, fontFamily: "Nunito Sans", fontSize: 230, fontWeight: 700, fill: "$accent", letterSpacing: -8, label: "Stat 1", name: "Stat 1" }),
+        b.text("of the world's disease burden.", { x: M, y: 470, w: CW, fontFamily: "Nunito Sans", fontSize: 48, fontWeight: 500, fill: "$ink", label: "Stat 1 label", name: "Stat 1 label" }),
+        b.text("<2%", { x: M - 4, y: 600, w: CW, fontFamily: "Nunito Sans", fontSize: 230, fontWeight: 700, fill: "$primary", letterSpacing: -8, label: "Stat 2", name: "Stat 2" }),
+        b.text("of its research.", { x: M, y: 840, w: CW, fontFamily: "Nunito Sans", fontSize: 48, fontWeight: 500, fill: "$ink", label: "Stat 2 label", name: "Stat 2 label" }),
         rule(b, M, 980, 120),
-        b.text("The gap is the mission.", { x: M, y: 1020, w: CW, fontFamily: "Cormorant Garamond", fontSize: 64, fontWeight: 500, italic: true, fill: "$ink", label: "Subtext", name: "Subtext" }),
+        b.text("The gap is the mission.", { x: M, y: 1020, w: CW, fontFamily: "Nunito", fontSize: 64, fontWeight: 500, italic: true, fill: "$ink", label: "Subtext", name: "Subtext" }),
         ...footer(b, t, "Swipe →", { counter: "01 / 04" }),
       ],
     },
@@ -163,8 +163,8 @@ export const post13 = defineDesign({
       els: [
         ...header(b, t),
         b.image({ x: M, y: 190, w: CW, h: 720, placeholderFill: "$surface", hint: "Illustrated portrait of Rosalind Franklin", label: "Portrait", name: "Portrait", cornerRadius: 4 }),
-        b.text("Rosalind Franklin. 1920–1958.", { x: M, y: 950, w: CW, fontFamily: "Cormorant Garamond", fontSize: 40, fontWeight: 500, italic: true, fill: "$accent", label: "Name and dates", name: "Name and dates" }),
-        b.text("She discovered the structure of life.", { x: M, y: 1010, w: CW, fontFamily: "Playfair Display", fontSize: 74, fontWeight: 700, fill: "$ink", lineHeight: 1.05, label: "Headline", name: "Headline" }),
+        b.text("Rosalind Franklin. 1920–1958.", { x: M, y: 950, w: CW, fontFamily: "Nunito", fontSize: 40, fontWeight: 500, italic: true, fill: "$accent", label: "Name and dates", name: "Name and dates" }),
+        b.text("She discovered the structure of life.", { x: M, y: 1010, w: CW, fontFamily: "Nunito", fontSize: 74, fontWeight: 700, fill: "$ink", lineHeight: 1.05, label: "Headline", name: "Headline" }),
         ...footer(b, t, "Swipe →", { counter: "01 / 04" }),
       ],
     },
@@ -173,8 +173,8 @@ export const post13 = defineDesign({
       els: [
         ...header(b, t),
         ...photo51(b, W / 2, 520, 280),
-        b.text("Photo 51. The most important photograph in biology. Taken by Rosalind Franklin.", { x: M, y: 860, w: CW, fontFamily: "Playfair Display", fontSize: 52, fontWeight: 700, fill: "$ink", lineHeight: 1.1, label: "Headline", name: "Headline" }),
-        b.text("Without her permission, this image was shown to Watson and Crick — and formed the basis of their Nobel Prize–winning discovery.", { x: M, y: 1080, w: CW, fontFamily: "Inter", fontSize: 27, fill: "$muted", lineHeight: 1.45, label: "Body", name: "Body" }),
+        b.text("Photo 51. The most important photograph in biology. Taken by Rosalind Franklin.", { x: M, y: 860, w: CW, fontFamily: "Nunito", fontSize: 52, fontWeight: 700, fill: "$ink", lineHeight: 1.1, label: "Headline", name: "Headline" }),
+        b.text("Without her permission, this image was shown to Watson and Crick — and formed the basis of their Nobel Prize–winning discovery.", { x: M, y: 1080, w: CW, fontFamily: "Nunito Sans", fontSize: 27, fill: "$muted", lineHeight: 1.45, label: "Body", name: "Body" }),
         ...footer(b, t, "Swipe →", { counter: "02 / 04" }),
       ],
     },
@@ -190,8 +190,8 @@ function timeline(b: B, y: number, items: Array<[string, string]>): DesignElemen
     const x = M + i * step;
     els.push(
       b.shape("ellipse", { x: x - 12, y: y - 12, w: 24, h: 24, fill: "$primary", name: "Timeline node" }),
-      b.text(year, { x: x - 110, y: y - 80, w: 220, fontFamily: "Space Grotesk", fontSize: 34, fontWeight: 700, fill: "$primary", align: "center", label: `${label} year`, name: "Year" }),
-      b.text(label, { x: x - 110, y: y + 34, w: 220, fontFamily: "Inter", fontSize: 24, fontWeight: 500, fill: "$ink", align: "center", lineHeight: 1.3, label: `${year} label`, name: "Milestone" }),
+      b.text(year, { x: x - 110, y: y - 80, w: 220, fontFamily: "Nunito Sans", fontSize: 34, fontWeight: 700, fill: "$primary", align: "center", label: `${label} year`, name: "Year" }),
+      b.text(label, { x: x - 110, y: y + 34, w: 220, fontFamily: "Nunito Sans", fontSize: 24, fontWeight: 500, fill: "$ink", align: "center", lineHeight: 1.3, label: `${year} label`, name: "Milestone" }),
     );
   });
   return els;
@@ -215,9 +215,9 @@ export const post15 = defineDesign({
       name: "Smartphone",
       els: [
         ...header(b, t),
-        b.text("Your Smartphone Is the Product of 50 Years of Parallel Research.", { x: M, y: 210, w: CW, fontFamily: "Space Grotesk", fontSize: 70, fontWeight: 700, fill: "$ink", lineHeight: 1.05, label: "Headline", name: "Headline" }),
+        b.text("Your Smartphone Is the Product of 50 Years of Parallel Research.", { x: M, y: 210, w: CW, fontFamily: "Nunito Sans", fontSize: 70, fontWeight: 700, fill: "$ink", lineHeight: 1.05, label: "Headline", name: "Headline" }),
         ...timeline(b, 700, [["1947", "Semiconductors"], ["1973", "GPS"], ["1992", "Touchscreen"], ["2000s", "Wireless internet"]]),
-        b.text("= the device in your hand.", { x: M, y: 900, w: CW, fontFamily: "Space Grotesk", fontSize: 48, fontWeight: 500, fill: "$primary", label: "Result line", name: "Result line" }),
+        b.text("= the device in your hand.", { x: M, y: 900, w: CW, fontFamily: "Nunito Sans", fontSize: 48, fontWeight: 500, fill: "$primary", label: "Result line", name: "Result line" }),
         ...footer(b, t, "Swipe →", { counter: "03 / 06" }),
       ],
     },

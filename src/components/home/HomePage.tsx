@@ -16,7 +16,7 @@ import { Spinner } from "@/components/ui";
 const ACTIONS = [
   { href: "/templates?kind=design", label: "Create a design", note: "Carousels, statics, stories", icon: PenTool },
   { href: "/templates?kind=video&category=reel", label: "Create a video", note: "Reels from the campaign scripts", icon: Film },
-  { href: "/templates?kind=video&category=motion", label: "Create motion graphics", note: "Counters, charts, statements", icon: Clapperboard },
+  { href: "/templates?category=btd", label: "Beyond The Dashboard", note: "Webinar flyers, stories & promos", icon: Clapperboard },
   { href: "/templates", label: "Browse templates", note: `${ALL_TEMPLATES.length} ready-made templates`, icon: LayoutTemplate },
 ];
 
@@ -28,7 +28,7 @@ export function HomePage() {
     api<{ assets: AssetMeta[] }>("/api/assets").then((r) => setAssets(r.assets.filter((a) => a.kind !== "audio").slice(0, 6))).catch(() => undefined);
   }, []);
   const favTemplates = ALL_TEMPLATES.filter((t) => favorites.includes(t.id));
-  const featured = ["p05-ishango-bone", "p02-africa-first-research", "v17-sixty-seconds", "p11-smallpox", "p32-campaign-close"].map((id) => ALL_TEMPLATES.find((t) => t.id === id)!).filter(Boolean);
+  const featured = ["logo-assemble", "btd-split-dashboard", "btd-night-terminal", "v-btd-promo", "bd-gold-night", "nm-month-grid", "ny-chrome-2027", "xmas-emerald-ornaments", "wk-week-strip", "logo-signal"].map((id) => ALL_TEMPLATES.find((t) => t.id === id)!).filter(Boolean);
 
   return (
     <div className="space-y-12">

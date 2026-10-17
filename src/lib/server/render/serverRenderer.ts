@@ -1,5 +1,6 @@
 import path from "node:path";
 import fs from "node:fs";
+import os from "node:os";
 import type { VideoDoc } from "@/lib/video/types";
 
 /**
@@ -75,7 +76,7 @@ export async function renderVideoOnServer(input: ServerRenderInput): Promise<voi
     imageFormat: "jpeg",
     jpegQuality: 90,
     logLevel: "error",
-    concurrency: Math.max(1, Math.min(4, Number(process.env.RENDER_CONCURRENCY) || 2)),
+    concurrency: Math.max(1, Math.min(os.cpus().length || 1, 8, Number(process.env.RENDER_CONCURRENCY) || Math.min(4, os.cpus().length || 1))),
     onProgress: ({ progress, stitchStage }) => input.onProgress?.(0.05 + progress * 0.95, stitchStage === "muxing" ? "Finishing file" : "Rendering frames"),
   });
 }

@@ -150,6 +150,16 @@ function TextProps({ el, view, doc, patch, k }: P<TextElement>) {
         <IconButton label="Uppercase" active={el.uppercase} onClick={() => patch({ uppercase: !el.uppercase })}><span className="text-[11px] font-bold">AA</span></IconButton>
       </div>
       <ColorField label="Colour" value={el.fill} palette={view.palette} paletteLabels={doc.paletteLabels} onChange={(v) => patch({ fill: v }, k("fill"))} />
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={(el.strokeWidth ?? 0) > 0} onChange={(e) => patch(e.target.checked ? { strokeWidth: Math.max(2, Math.round(el.fontSize / 40)), stroke: el.stroke ?? el.fill } : { strokeWidth: 0 })} /> Outline
+      </label>
+      {(el.strokeWidth ?? 0) > 0 && (
+        <>
+          <ColorField label="Outline colour" value={el.stroke ?? "$ink"} palette={view.palette} paletteLabels={doc.paletteLabels} onChange={(v) => patch({ stroke: v }, k("stroke"))} />
+          <Range label="Outline width" value={el.strokeWidth ?? 0} min={0} max={20} step={0.5} onChange={(v) => patch({ strokeWidth: v }, k("tsw"))} />
+          <Button size="sm" variant="ghost" onClick={() => patch({ fill: el.fill === "transparent" ? (el.stroke ?? "$ink") : "transparent" })}>{el.fill === "transparent" ? "Fill letters" : "Hollow letters"}</Button>
+        </>
+      )}
     </Section>
   );
 }
@@ -194,12 +204,14 @@ function ShapeProps({ el, view, doc, patch, k }: P<ShapeElement>) {
       <ColorField label={el.shape === "line" ? "Line colour" : "Outline"} value={el.stroke} palette={view.palette} paletteLabels={doc.paletteLabels} onChange={(v) => patch({ stroke: v }, k("stroke"))} />
       <Range label={el.shape === "line" ? "Thickness" : "Outline width"} value={el.strokeWidth} min={0} max={40} step={1} onChange={(v) => patch({ strokeWidth: v }, k("sw"))} />
       {el.shape === "rect" && <Range label="Corner radius" value={el.cornerRadius} min={0} max={Math.min(el.width, el.height) / 2} step={1} onChange={(v) => patch({ cornerRadius: v }, k("cr"))} />}
+      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={Boolean(el.dotted)} onChange={(e) => patch(e.target.checked ? { dotted: true, dash: [0.1, Math.max(8, el.strokeWidth * 2.6)] } : { dotted: false, dash: undefined })} /> Dotted stroke</label>
       {el.shape === "rect" && (
         <Field label="Fade">
           <Select value={el.fade ?? ""} onChange={(e) => patch({ fade: (e.target.value || undefined) as ShapeElement["fade"] })}>
             <option value="">Solid</option>
             <option value="up">Fade in towards bottom</option>
             <option value="down">Fade in towards top</option>
+            <option value="radial">Soft glow</option>
           </Select>
         </Field>
       )}
@@ -212,7 +224,7 @@ function PatternProps({ el, view, doc, patch, k }: P<PatternElement>) {
     <Section title="Texture">
       <Field label="Pattern">
         <Select value={el.pattern} onChange={(e) => patch({ pattern: e.target.value as PatternElement["pattern"] })}>
-          {["dots", "grid", "diagonal", "waves", "plus", "stars"].map((p) => <option key={p} value={p}>{p}</option>)}
+          {["noise", "dotgrid", "halftone", "contours", "dots", "grid", "diagonal", "waves", "plus", "stars"].map((p) => <option key={p} value={p}>{p}</option>)}
         </Select>
       </Field>
       <ColorField label="Colour" value={el.color} palette={view.palette} paletteLabels={doc.paletteLabels} onChange={(v) => patch({ color: v })} />
@@ -307,7 +319,7 @@ export function QuickEdit({ doc, pageIndex, onText, onPalette, onPickImage, onSe
 }
 
 // ─────────────── add elements ───────────────
-export type AddKind = "heading" | "subheading" | "body" | "rect" | "ellipse" | "line" | "triangle" | "star" | "photo" | "logo" | "bar" | "donut" | "dots";
+export type AddKind = "heading" | "subheading" | "body" | "rect" | "ellipse" | "line" | "triangle" | "star" | "photo" | "logo" | "bar" | "donut" | "dots" | "hexagon" | "wave" | "dotring" | "noise";
 
 export function AddPanel({ onAdd }: { onAdd: (k: AddKind) => void }) {
   const Tile = ({ k, icon, label }: { k: AddKind; icon: React.ReactNode; label: string }) => (
@@ -330,7 +342,11 @@ export function AddPanel({ onAdd }: { onAdd: (k: AddKind) => void }) {
           <Tile k="line" icon={<Minus size={18} />} label="Line" />
           <Tile k="triangle" icon={<Triangle size={18} />} label="Triangle" />
           <Tile k="star" icon={<Star size={18} />} label="Star" />
-          <Tile k="dots" icon={<span className="text-base leading-none">⁘</span>} label="Texture" />
+          <Tile k="hexagon" icon={<span className="text-base leading-none">⬡</span>} label="Hexagon" />
+          <Tile k="wave" icon={<span className="text-base leading-none">∿</span>} label="Wave" />
+          <Tile k="dotring" icon={<span className="text-base leading-none">◌</span>} label="Dotted ring" />
+          <Tile k="noise" icon={<span className="text-base leading-none">▒</span>} label="Grain" />
+          <Tile k="dots" icon={<span className="text-base leading-none">⁘</span>} label="Dot grid" />
         </div>
       </Section>
       <Section title="Media & data">
@@ -355,7 +371,7 @@ export function makeElement(k: AddKind, view: PageView, id: string): DesignEleme
     case "body": {
       const fs = k === "heading" ? Math.round(view.width * 0.07) : k === "subheading" ? Math.round(view.width * 0.04) : Math.round(view.width * 0.026);
       const w = view.width * 0.7;
-      return { ...base, type: "text", name: k === "heading" ? "Heading" : k === "subheading" ? "Subheading" : "Body text", x: cx - w / 2, y: cy - fs, width: w, height: 0, text: k === "heading" ? "Add a heading" : k === "subheading" ? "Add a subheading" : "Add a little bit of body text", fontFamily: k === "body" ? "Inter" : "Space Grotesk", fontSize: fs, fontWeight: k === "heading" ? 700 : k === "subheading" ? 600 : 400, fill: "$ink", align: "left", lineHeight: k === "body" ? 1.45 : 1.1, letterSpacing: 0 };
+      return { ...base, type: "text", name: k === "heading" ? "Heading" : k === "subheading" ? "Subheading" : "Body text", x: cx - w / 2, y: cy - fs, width: w, height: 0, text: k === "heading" ? "Add a heading" : k === "subheading" ? "Add a subheading" : "Add a little bit of body text", fontFamily: k === "body" ? "Nunito Sans" : "Nunito Sans", fontSize: fs, fontWeight: k === "heading" ? 700 : k === "subheading" ? 600 : 400, fill: "$ink", align: "left", lineHeight: k === "body" ? 1.45 : 1.1, letterSpacing: 0 };
     }
     case "photo":
     case "logo": {
@@ -364,11 +380,19 @@ export function makeElement(k: AddKind, view: PageView, id: string): DesignEleme
       return { ...base, type: "image", name: k === "logo" ? "Logo" : "Photo", x: cx - w / 2, y: cy - h / 2, width: w, height: h, src: k === "logo" ? "/brand/dawb-logo-light.svg" : "", fit: k === "logo" ? "contain" : "cover", cropZoom: 1, cropX: 0, cropY: 0, cornerRadius: 0, placeholderFill: "$surface", role: k === "logo" ? "logo" : "photo" };
     }
     case "bar":
-      return { ...base, type: "chart", name: "Chart", chart: "bar", x: cx - view.width * 0.3, y: cy - view.width * 0.2, width: view.width * 0.6, height: view.width * 0.4, values: [12, 19, 15, 26], labels: ["Q1", "Q2", "Q3", "Q4"], color: "$primary", secondaryColor: "$muted", labelColor: "$ink", showLabels: true, showValues: true, fontFamily: "Inter" };
+      return { ...base, type: "chart", name: "Chart", chart: "bar", x: cx - view.width * 0.3, y: cy - view.width * 0.2, width: view.width * 0.6, height: view.width * 0.4, values: [12, 19, 15, 26], labels: ["Q1", "Q2", "Q3", "Q4"], color: "$primary", secondaryColor: "$muted", labelColor: "$ink", showLabels: true, showValues: true, fontFamily: "Nunito Sans" };
     case "donut":
       return { ...makeElement("bar", view, id), chart: "donut" } as ChartElement;
+    case "noise":
+      return { ...base, type: "pattern", name: "Grain", pattern: "noise", x: 0, y: 0, width: view.width, height: view.height, color: "$ink", spacing: 40, size: 2, opacity: 0.6 };
+    case "dotring": {
+      const s = view.width * 0.4;
+      return { ...base, type: "shape", name: "Dotted ring", shape: "ellipse", x: cx - s / 2, y: cy - s / 2, width: s, height: s, fill: "transparent", stroke: "$primary", strokeWidth: 5, cornerRadius: 0, dotted: true, dash: [0.1, 16] };
+    }
+    case "wave":
+      return { ...base, type: "shape", name: "Wave", shape: "wave", x: cx - view.width * 0.3, y: cy - 20, width: view.width * 0.6, height: 40, fill: "$primary", stroke: "$primary", strokeWidth: 5, cornerRadius: 0, points: 5 };
     case "dots":
-      return { ...base, type: "pattern", name: "Texture", pattern: "dots", x: 0, y: 0, width: view.width, height: view.height, color: "$primary", spacing: 40, size: 2, opacity: 0.25 };
+      return { ...base, type: "pattern", name: "Dot grid", pattern: "dotgrid", x: 0, y: 0, width: view.width, height: view.height, color: "$primary", spacing: 40, size: 2, opacity: 0.25 };
     default: {
       const s = view.width * 0.25;
       const shape = k as ShapeElement["shape"];
