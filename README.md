@@ -114,7 +114,7 @@ src/
 
 ```bash
 npm run typecheck      # TypeScript
-npm test               # 58 unit tests: every template validates; storage, permissions, conflicts, sniffing, allowlist, timeline
+npm test               # 95 unit tests: every template validates; storage, permissions, conflicts, sniffing, allowlist, timeline
 npm run build          # production build
 npm run render:test    # server-render the sample composition → out/render-test.mp4
 npx tsx scripts/render-template.ts logo-assemble v-btd-promo   # render any video template → out/<id>.mp4

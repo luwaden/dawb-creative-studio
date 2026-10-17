@@ -76,7 +76,7 @@ export function AssetPicker({ open, onClose, onPick, mode = "image", preferLogos
             {logos.map((l) => (
               <button key={l.id} onClick={() => choose({ url: l.url, name: l.name })} className="group overflow-hidden rounded-md border border-line text-left hover:border-brand">
                 <img src={l.url} alt={l.name} className="aspect-square w-full object-contain" style={{ background: l.background }} />
-                <span className="block truncate px-2 py-1.5 text-[11px] text-ink-2">{l.background === "#000000" ? "Dark background" : "Light background"}</span>
+                <span className="block truncate px-2 py-1.5 text-[11px] text-ink-2">{l.name.replace("DAWB logo — ", "").replace(/^./, (c) => c.toUpperCase())}</span>
               </button>
             ))}
           </div>
