@@ -5,6 +5,7 @@ import type {
   DesignPage,
   ImageElement,
   PatternElement,
+  QrElement,
   ShapeElement,
   TextElement,
 } from "./types";
@@ -115,6 +116,10 @@ export function createBuilder(prefix = "e") {
         fontFamily: "Nunito Sans",
         ...rest,
       };
+    },
+    qr(value: string, g: Geo & Partial<Omit<QrElement, "id" | "type" | "value" | "x" | "y" | "width" | "height">>): QrElement {
+      const { x: _x, y: _y, w: _w, h: _h, rotation: _r, opacity: _o, label: _l, name: _n, locked: _lk, ...rest } = g;
+      return { ...geo({ ...g, h: g.h ?? g.w }), type: "qr", value, fg: "#071C24", bg: "#FFFFFF", margin: 2, ...rest };
     },
   };
 }

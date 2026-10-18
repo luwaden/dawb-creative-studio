@@ -1,4 +1,5 @@
 import { NEW_SCENES } from "./scenes2";
+import { SCENES3 } from "./scenes3";
 import type { CSSProperties } from "react";
 import { AbsoluteFill, Easing, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import type { Scene, SceneType } from "@/lib/video/types";
@@ -592,6 +593,7 @@ function LogoOutro({ scene }: Props) {
 
 export const SCENE_COMPONENTS: Record<SceneType, React.FC<Props>> = {
   ...NEW_SCENES,
+  ...SCENES3,
   "kinetic-title": KineticTitle,
   "photo-hero": PhotoHero,
   "lower-third": LowerThird,

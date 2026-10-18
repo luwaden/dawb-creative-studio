@@ -1,4 +1,5 @@
 import type { SceneType } from "./types";
+import { TRAINING_TOOLS, TRAINING_TOOL_IDS } from "@/lib/training";
 
 /**
  * Field definitions per scene type. The video editor builds its property panel
@@ -26,6 +27,80 @@ export interface SceneDefinition {
 const alignField: FieldDef = { key: "align", label: "Alignment", type: "select", options: [{ value: "left", label: "Left" }, { value: "center", label: "Center" }] };
 
 export const SCENE_DEFINITIONS: Record<SceneType, SceneDefinition> = {
+  "data-chart": {
+    type: "data-chart",
+    label: "Data chart",
+    description: "Animated column, bar, line, pie, donut, waterfall, histogram, scatter or map chart with a key insight",
+    defaultDuration: 180,
+    fields: [
+      { key: "eyebrow", label: "Small heading", type: "text" },
+      { key: "title", label: "Title", type: "textarea", rows: 2 },
+      { key: "kind", label: "Chart type", type: "select", options: [{ value: "column", label: "Column" }, { value: "bar", label: "Bar (horizontal)" }, { value: "line", label: "Line" }, { value: "pie", label: "Pie" }, { value: "donut", label: "Donut" }, { value: "waterfall", label: "Waterfall" }, { value: "histogram", label: "Histogram" }, { value: "scatter", label: "Scatter plot" }, { value: "map", label: "Map" }] },
+      { key: "items", label: "Data (map: label = state/country · scatter: x + value · waterfall: last item 0 = total name)", type: "list", max: 40, item: [{ key: "label", label: "Label", type: "text" }, { key: "value", label: "Value", type: "number" }, { key: "x", label: "X (scatter)", type: "number" }] },
+      { key: "unit", label: "Value suffix", type: "text", max: 12 },
+      { key: "map", label: "Map", type: "select", options: [{ value: "nigeria", label: "Nigeria — states" }, { value: "africa", label: "Africa — countries" }] },
+      { key: "xTitle", label: "X-axis title (scatter)", type: "text" },
+      { key: "yTitle", label: "Y-axis title (scatter)", type: "text" },
+      { key: "insight", label: "Key insight", type: "textarea", rows: 2 },
+      { key: "source", label: "Source / note", type: "text" },
+    ],
+    defaults: { eyebrow: "By the numbers", title: "Chart title", kind: "column", items: [{ label: "A", value: 30 }, { label: "B", value: 55 }, { label: "C", value: 42 }], unit: "", map: "nigeria", xTitle: "", yTitle: "", insight: "", source: "Sample data — replace with your figures" },
+  },
+  "qr-call": {
+    type: "qr-call",
+    label: "QR call to action",
+    description: "Scannable QR code for a form or questionnaire, with details",
+    defaultDuration: 180,
+    fields: [
+      { key: "eyebrow", label: "Small heading", type: "text" },
+      { key: "title", label: "Title", type: "textarea", rows: 2 },
+      { key: "message", label: "Message", type: "textarea", rows: 3 },
+      { key: "link", label: "Form link (encoded in the QR)", type: "text", placeholder: "https://forms.gle/…", max: 600 },
+      { key: "linkText", label: "Link shown under the QR", type: "text" },
+      { key: "cta", label: "Call to action", type: "text" },
+      { key: "duration", label: "Time to complete", type: "text" },
+      { key: "deadline", label: "Deadline", type: "text" },
+      { key: "privacy", label: "Privacy note", type: "text" },
+    ],
+    defaults: { eyebrow: "Call for participants", title: "Help shape our research", message: "", link: "", linkText: "", cta: "Scan to take the survey", duration: "Takes about 5 minutes", deadline: "", privacy: "Anonymous & confidential" },
+  },
+  team: {
+    type: "team",
+    label: "Team",
+    description: "Team members with photo, profession and location — grid or one-person spotlight",
+    defaultDuration: 165,
+    fields: [
+      { key: "title", label: "Title", type: "text" },
+      { key: "subtitle", label: "Subtitle", type: "textarea", rows: 2 },
+      { key: "layout", label: "Layout", type: "select", options: [{ value: "grid", label: "Grid (up to 6)" }, { value: "spotlight", label: "Spotlight (first member)" }] },
+      { key: "members", label: "Members", type: "list", max: 6, item: [{ key: "name", label: "Name", type: "text" }, { key: "role", label: "Profession", type: "text" }, { key: "location", label: "Location", type: "text" }] },
+      { key: "photo1", label: "Photo 1", type: "image" },
+      { key: "photo2", label: "Photo 2", type: "image" },
+      { key: "photo3", label: "Photo 3", type: "image" },
+      { key: "photo4", label: "Photo 4", type: "image" },
+      { key: "photo5", label: "Photo 5", type: "image" },
+      { key: "photo6", label: "Photo 6", type: "image" },
+    ],
+    defaults: { title: "Meet the research team", subtitle: "", layout: "grid", members: [{ name: "Member Name", role: "Profession", location: "City, Country" }], photo1: "", photo2: "", photo3: "", photo4: "", photo5: "", photo6: "" },
+  },
+  training: {
+    type: "training",
+    label: "Training announcement",
+    description: "Course announcement with an animated illustration of the tool",
+    defaultDuration: 180,
+    fields: [
+      { key: "tool", label: "Track", type: "select", options: TRAINING_TOOL_IDS.map((id) => ({ value: id, label: TRAINING_TOOLS[id].name })) },
+      { key: "eyebrow", label: "Small heading", type: "text" },
+      { key: "title", label: "Title (blank = track name)", type: "textarea", rows: 2 },
+      { key: "subtitle", label: "Subtitle", type: "textarea", rows: 2 },
+      { key: "modules", label: "What you'll learn", type: "list", max: 6, item: [{ key: "text", label: "Module", type: "text" }] },
+      { key: "date", label: "Start date", type: "text" },
+      { key: "duration", label: "Duration", type: "text" },
+      { key: "mode", label: "Mode", type: "text" },
+      { key: "cta", label: "Call to action", type: "text" },
+    ],
+    defaults: { tool: "excel", eyebrow: "New cohort", title: "", subtitle: "", modules: [], date: "", duration: "", mode: "Online", cta: "Register now" },
+  },
   "logo-reveal": {
     type: "logo-reveal",
     label: "Logo reveal",

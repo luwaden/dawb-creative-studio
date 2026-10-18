@@ -16,6 +16,9 @@ export type CategoryId =
   | "linkedin"
   | "logo"
   | "btd"
+  | "research"
+  | "data"
+  | "training"
   | "christmas"
   | "newyear"
   | "newmonth"
@@ -29,6 +32,9 @@ export interface Category {
 
 export const CATEGORIES: Category[] = [
   { id: "btd", label: "Beyond The Dashboard" },
+  { id: "research", label: "Research & questionnaires" },
+  { id: "data", label: "Data & charts" },
+  { id: "training", label: "Training" },
   { id: "logo", label: "Logo motion" },
   { id: "birthday", label: "Happy birthday" },
   { id: "newmonth", label: "New month" },

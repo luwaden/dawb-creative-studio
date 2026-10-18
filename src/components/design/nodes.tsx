@@ -8,12 +8,14 @@ import type {
   DesignElement,
   ImageElement,
   PatternElement,
+  QrElement,
   ShapeElement,
   TextElement,
 } from "@/lib/design/types";
 import { resolveColor } from "@/lib/design/types";
 import { useCanvasImage } from "@/lib/design/imageCache";
 import { nearestWeight } from "@/lib/fonts";
+import { ChartMarks, QrMarks } from "./chartNode";
 
 export interface NodeHandlers {
   interactive: boolean;
@@ -499,81 +501,17 @@ function PatternNode({ el, palette, h }: { el: PatternElement } & P) {
 }
 
 function ChartNode({ el, palette, h }: { el: ChartElement } & P) {
-  const color = resolveColor(el.color, palette);
-  const color2 = resolveColor(el.secondaryColor, palette);
-  const labelColor = resolveColor(el.labelColor, palette);
-  const vals = el.values.length ? el.values : [0];
-  const max = Math.max(...vals, 1);
-  const w = el.width;
-  const ht = el.height;
-  const fs = Math.max(12, Math.min(w, ht) / 16);
-  const labelSpace = el.showLabels ? fs * 1.8 : 0;
-  const valueSpace = el.showValues ? fs * 1.6 : 0;
-  const parts: React.ReactNode[] = [<Rect key="hit" width={w} height={ht} fill="rgba(0,0,0,0)" />];
-
-  if (el.chart === "bar") {
-    const n = vals.length;
-    const gap = (w / n) * 0.28;
-    const bw = (w - gap * (n - 1)) / n;
-    const plotH = ht - labelSpace - valueSpace;
-    vals.forEach((v, i) => {
-      const bh = Math.max(2, (v / max) * plotH);
-      const x = i * (bw + gap);
-      const y = valueSpace + plotH - bh;
-      parts.push(<Rect key={`b${i}`} x={x} y={y} width={bw} height={bh} fill={i === vals.indexOf(max) ? color : color2} cornerRadius={Math.min(6, bw / 6)} />);
-      if (el.showValues) parts.push(<Text key={`v${i}`} x={x} y={y - fs * 1.4} width={bw} align="center" text={String(v)} fontSize={fs} fontFamily={el.fontFamily} fontStyle="700" fill={labelColor} />);
-      if (el.showLabels) parts.push(<Text key={`l${i}`} x={x - gap / 2} y={ht - labelSpace + fs * 0.5} width={bw + gap} align="center" text={el.labels[i] ?? ""} fontSize={fs * 0.9} fontFamily={el.fontFamily} fill={labelColor} opacity={0.75} />);
-    });
-  } else if (el.chart === "hbar") {
-    const n = vals.length;
-    const rowH = ht / n;
-    const labelW = el.showLabels ? w * 0.3 : 0;
-    const valueW = el.showValues ? fs * 3.2 : 0;
-    const plotW = w - labelW - valueW;
-    vals.forEach((v, i) => {
-      const y = i * rowH + rowH * 0.18;
-      const bh = rowH * 0.64;
-      const bw = Math.max(2, (v / max) * plotW);
-      if (el.showLabels) parts.push(<Text key={`l${i}`} x={0} y={y} height={bh} width={labelW - fs * 0.6} verticalAlign="middle" text={el.labels[i] ?? ""} fontSize={fs} fontFamily={el.fontFamily} fontStyle="600" fill={labelColor} />);
-      parts.push(<Rect key={`tr${i}`} x={labelW} y={y} width={plotW} height={bh} fill={color2} opacity={0.35} cornerRadius={bh / 2} />);
-      parts.push(<Rect key={`b${i}`} x={labelW} y={y} width={bw} height={bh} fill={color} cornerRadius={bh / 2} />);
-      if (el.showValues) parts.push(<Text key={`v${i}`} x={labelW + plotW + fs * 0.5} y={y} height={bh} verticalAlign="middle" text={String(v)} fontSize={fs} fontFamily={el.fontFamily} fontStyle="700" fill={labelColor} />);
-    });
-  } else if (el.chart === "line") {
-    const plotH = ht - labelSpace - valueSpace;
-    const n = vals.length;
-    const step = n > 1 ? w / (n - 1) : 0;
-    const pts: number[] = [];
-    vals.forEach((v, i) => pts.push(i * step, valueSpace + plotH - (v / max) * plotH));
-    parts.push(<Line key="area" points={[0, valueSpace + plotH, ...pts, w, valueSpace + plotH]} closed fill={color} opacity={0.12} />);
-    parts.push(<Line key="line" points={pts} stroke={color} strokeWidth={Math.max(3, fs / 4)} lineJoin="round" lineCap="round" tension={0.25} />);
-    vals.forEach((v, i) => {
-      const x = pts[i * 2];
-      const y = pts[i * 2 + 1];
-      parts.push(<Ellipse key={`p${i}`} x={x} y={y} radiusX={fs / 3} radiusY={fs / 3} fill={color} stroke={color2} strokeWidth={0} />);
-      if (el.showValues) parts.push(<Text key={`v${i}`} x={x - 40} y={y - fs * 1.6} width={80} align="center" text={String(v)} fontSize={fs * 0.9} fontFamily={el.fontFamily} fontStyle="700" fill={labelColor} />);
-      if (el.showLabels) parts.push(<Text key={`l${i}`} x={x - 60} y={ht - labelSpace + fs * 0.5} width={120} align="center" text={el.labels[i] ?? ""} fontSize={fs * 0.9} fontFamily={el.fontFamily} fill={labelColor} opacity={0.75} />);
-    });
-  } else {
-    const total = vals.reduce((a, b) => a + Math.max(0, b), 0) || 1;
-    const r = Math.min(w, ht) / 2;
-    let start = -90;
-    const shades = [color, color2, labelColor];
-    vals.forEach((v, i) => {
-      const angle = (Math.max(0, v) / total) * 360;
-      parts.push(<Arc key={`a${i}`} x={w / 2} y={ht / 2} innerRadius={r * 0.62} outerRadius={r} angle={angle} rotation={start} fill={shades[i % shades.length]} opacity={i < 3 ? 1 : 0.6} />);
-      start += angle;
-    });
-    if (el.showValues) {
-      const pct = Math.round((Math.max(0, vals[0]) / total) * 100);
-      parts.push(<Text key="center" x={0} y={ht / 2 - r * 0.22} width={w} align="center" text={`${pct}%`} fontSize={r * 0.4} fontFamily={el.fontFamily} fontStyle="800" fill={labelColor} />);
-    }
-    if (el.showLabels && el.labels[0]) parts.push(<Text key="lab" x={0} y={ht / 2 + r * 0.2} width={w} align="center" text={el.labels[0]} fontSize={r * 0.12} fontFamily={el.fontFamily} fill={labelColor} opacity={0.7} />);
-  }
-
   return (
-    <Group {...commonProps(el, h)} width={w} height={ht}>
-      {parts}
+    <Group {...commonProps(el, h)} width={el.width} height={el.height}>
+      <ChartMarks el={el} palette={palette} />
+    </Group>
+  );
+}
+
+function QrNode({ el, palette, h }: { el: QrElement } & P) {
+  return (
+    <Group {...commonProps(el, h)} width={el.width} height={el.height}>
+      <QrMarks el={el} palette={palette} />
     </Group>
   );
 }
@@ -590,5 +528,7 @@ export function ElementNode({ el, palette, h }: { el: DesignElement } & P) {
       return <PatternNode el={el} palette={palette} h={h} />;
     case "chart":
       return <ChartNode el={el} palette={palette} h={h} />;
+    case "qr":
+      return <QrNode el={el} palette={palette} h={h} />;
   }
 }

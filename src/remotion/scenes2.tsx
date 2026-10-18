@@ -19,7 +19,7 @@ function lum(hex: string) {
   return 0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255);
 }
 
-function useTone(scene: Scene) {
+export function useTone(scene: Scene) {
   const color = useColor();
   const bg = color(scene.background.color);
   const isCyan = bg.toLowerCase() === "#0097b2";
@@ -36,7 +36,7 @@ function useTone(scene: Scene) {
 }
 
 /** Letters rise one by one with a slight overshoot. */
-function KineticLine({ text, size, color, delay = 0, weight = 900, font = "Nunito", stagger = 1.6, outline }: { text: string; size: number; color: string; delay?: number; weight?: number; font?: string; stagger?: number; outline?: boolean }) {
+export function KineticLine({ text, size, color, delay = 0, weight = 900, font = "Nunito", stagger = 1.6, outline }: { text: string; size: number; color: string; delay?: number; weight?: number; font?: string; stagger?: number; outline?: boolean }) {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   return (
@@ -70,7 +70,7 @@ function KineticLine({ text, size, color, delay = 0, weight = 900, font = "Nunit
   );
 }
 
-function Pill({ text, bg, color, u, delay = 0 }: { text: string; bg: string; color: string; u: number; delay?: number }) {
+export function Pill({ text, bg, color, u, delay = 0 }: { text: string; bg: string; color: string; u: number; delay?: number }) {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const p = spring({ frame: frame - delay, fps, config: { damping: 200 } });

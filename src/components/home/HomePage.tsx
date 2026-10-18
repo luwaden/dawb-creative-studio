@@ -28,7 +28,7 @@ export function HomePage() {
     api<{ assets: AssetMeta[] }>("/api/assets").then((r) => setAssets(r.assets.filter((a) => a.kind !== "audio").slice(0, 6))).catch(() => undefined);
   }, []);
   const favTemplates = ALL_TEMPLATES.filter((t) => favorites.includes(t.id));
-  const featured = ["logo-assemble", "btd-split-dashboard", "btd-night-terminal", "v-btd-promo", "bd-gold-night", "nm-month-grid", "ny-chrome-2027", "xmas-emerald-ornaments", "wk-week-strip", "logo-signal"].map((id) => ALL_TEMPLATES.find((t) => t.id === id)!).filter(Boolean);
+  const featured = ["rs-survey-qr-white", "dt-snapshot-bento", "tr-catalogue", "v-applicant-stats", "rs-team-grid", "logo-assemble", "btd-split-dashboard", "btd-night-terminal", "v-btd-promo", "bd-gold-night", "nm-month-grid", "ny-chrome-2027", "xmas-emerald-ornaments", "wk-week-strip", "logo-signal"].map((id) => ALL_TEMPLATES.find((t) => t.id === id)!).filter(Boolean);
 
   return (
     <div className="space-y-12">

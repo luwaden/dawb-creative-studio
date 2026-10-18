@@ -8,7 +8,7 @@ const propValue: z.ZodType<unknown> = z.union([
   z.number().finite(),
   z.boolean(),
   z.null(),
-  z.array(z.record(z.string().max(40), z.union([z.string().max(500), z.number().finite(), z.boolean()]))).max(12),
+  z.array(z.record(z.string().max(40), z.union([z.string().max(500), z.number().finite(), z.boolean()]))).max(40),
 ]);
 
 export const sceneSchema = z.object({

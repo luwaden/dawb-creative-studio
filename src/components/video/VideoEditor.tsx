@@ -11,7 +11,7 @@ import { SCENE_DEFINITIONS, SCENE_TYPES, type FieldDef } from "@/lib/video/scene
 import { newSceneId, scene as makeScene } from "@/lib/video/build";
 import { ASPECTS, getSceneStarts, getVideoDuration, resolveThemeColor, type AspectId, type Scene, type SceneBackground, type SceneTransition, type VideoDoc } from "@/lib/video/types";
 import { checkBrowserSupport, renderInBrowser, renderOnServer, type RenderMode } from "@/lib/video/renderClient";
-import { FONTS } from "@/lib/fonts";
+import { FONTS, FONT_GROUPS } from "@/lib/fonts";
 import { DawbVideo } from "@/remotion/DawbVideo";
 import { AssetPicker } from "@/components/assets/AssetPicker";
 import { downloadBlob, safeFilename } from "@/lib/design/render";
@@ -479,10 +479,10 @@ function VideoSettings({ doc, set, pickAudio }: { doc: VideoDoc; set: (fn: (d: V
       </div>
       <div className="grid grid-cols-2 gap-2">
         <Field label="Headline font">
-          <Select value={doc.theme.displayFont} onChange={(e) => set((d) => ({ ...d, theme: { ...d.theme, displayFont: e.target.value } }))}>{FONTS.map((f) => <option key={f.family} value={f.family}>{f.family}</option>)}</Select>
+          <Select value={doc.theme.displayFont} onChange={(e) => set((d) => ({ ...d, theme: { ...d.theme, displayFont: e.target.value } }))}>{FONT_GROUPS.map((g) => <optgroup key={g.label} label={g.label}>{FONTS.filter((f) => g.categories.includes(f.category)).map((f) => <option key={f.family} value={f.family}>{f.label}</option>)}</optgroup>)}</Select>
         </Field>
         <Field label="Body font">
-          <Select value={doc.theme.bodyFont} onChange={(e) => set((d) => ({ ...d, theme: { ...d.theme, bodyFont: e.target.value } }))}>{FONTS.map((f) => <option key={f.family} value={f.family}>{f.family}</option>)}</Select>
+          <Select value={doc.theme.bodyFont} onChange={(e) => set((d) => ({ ...d, theme: { ...d.theme, bodyFont: e.target.value } }))}>{FONT_GROUPS.map((g) => <optgroup key={g.label} label={g.label}>{FONTS.filter((f) => g.categories.includes(f.category)).map((f) => <option key={f.family} value={f.family}>{f.label}</option>)}</optgroup>)}</Select>
         </Field>
       </div>
       <Field label="Logo" hint="Auto picks the official light or dark logo file to suit each scene.">

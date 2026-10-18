@@ -86,18 +86,34 @@ const pattern = z.object({
 const chart = z.object({
   ...base,
   type: z.literal("chart"),
-  chart: z.enum(["bar", "line", "donut", "hbar"]),
-  values: z.array(num).max(24),
-  labels: z.array(z.string().max(40)).max(24),
+  chart: z.enum(["bar", "hbar", "line", "donut", "pie", "waterfall", "histogram", "scatter", "map"]),
+  values: z.array(num).max(60),
+  labels: z.array(z.string().max(40)).max(60),
   color,
   secondaryColor: color,
   labelColor: color,
   showLabels: z.boolean(),
   showValues: z.boolean(),
   fontFamily: z.string().max(80),
+  unit: z.string().max(12).optional(),
+  showGrid: z.boolean().optional(),
+  xValues: z.array(num).max(60).optional(),
+  colors: z.array(color).max(12).optional(),
+  map: z.enum(["nigeria", "africa"]).optional(),
+  showTotal: z.boolean().optional(),
 });
 
-export const designElementSchema = z.discriminatedUnion("type", [text, image, shape, pattern, chart]);
+const qr = z.object({
+  ...base,
+  type: z.literal("qr"),
+  // Links only — keeps a QR from silently encoding something unexpected.
+  value: z.string().max(600),
+  fg: color,
+  bg: color,
+  margin: num.min(0).max(8),
+});
+
+export const designElementSchema = z.discriminatedUnion("type", [text, image, shape, pattern, chart, qr]);
 
 export const designPageSchema = z.object({
   id: z.string().min(1).max(64),

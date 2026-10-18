@@ -40,6 +40,10 @@ export type SfxName = "whoosh" | "impact" | "click" | "shimmer" | "riser" | "pop
 
 export type SceneType =
   | "logo-reveal"
+  | "data-chart"
+  | "qr-call"
+  | "team"
+  | "training"
   | "greeting"
   | "month"
   | "webinar"

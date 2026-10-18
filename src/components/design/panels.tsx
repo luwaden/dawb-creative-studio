@@ -5,9 +5,9 @@ import {
   AlignCenter, AlignLeft, AlignRight, ArrowDownToLine, ArrowUpToLine, BarChart3, ChevronDown, ChevronUp, Circle, Copy, Image as ImageIcon,
   Lock, Minus, Square, Star, Trash2, Triangle, Type, Unlock, Eye, EyeOff,
 } from "lucide-react";
-import type { ChartElement, DesignDoc, DesignElement, ImageElement, PageView, PatternElement, ShapeElement, TextElement } from "@/lib/design/types";
+import type { ChartElement, DesignDoc, DesignElement, ImageElement, PageView, PatternElement, QrElement, ShapeElement, TextElement } from "@/lib/design/types";
 import { resolveColor } from "@/lib/design/types";
-import { FONTS, nearestWeight } from "@/lib/fonts";
+import { FONTS, FONT_GROUPS, nearestWeight } from "@/lib/fonts";
 import { Button, cx, Field, IconButton, Input, Select, TextArea } from "@/components/ui";
 
 // ─────────────── shared controls ───────────────
@@ -95,6 +95,7 @@ export function ElementProperties({ el, view, doc, patch, actions }: { el: Desig
       {el.type === "shape" && <ShapeProps el={el} view={view} doc={doc} patch={patch} k={k} />}
       {el.type === "pattern" && <PatternProps el={el} view={view} doc={doc} patch={patch} k={k} />}
       {el.type === "chart" && <ChartProps el={el} view={view} doc={doc} patch={patch} k={k} />}
+      {el.type === "qr" && <QrProps el={el} view={view} doc={doc} patch={patch} k={k} />}
 
       <Section title="Position & size">
         <div className="grid grid-cols-2 gap-2">
@@ -128,7 +129,7 @@ function TextProps({ el, view, doc, patch, k }: P<TextElement>) {
       <TextArea rows={Math.min(8, Math.max(2, el.text.split("\n").length + 1))} value={el.text} onChange={(e) => patch({ text: e.target.value }, k("text"))} aria-label="Text content" />
       <Field label="Font">
         <Select value={el.fontFamily} onChange={(e) => patch({ fontFamily: e.target.value, fontWeight: nearestWeight(e.target.value, el.fontWeight) })}>
-          {FONTS.map((f) => <option key={f.family} value={f.family}>{f.label}</option>)}
+          {FONT_GROUPS.map((g) => <optgroup key={g.label} label={g.label}>{FONTS.filter((f) => g.categories.includes(f.category)).map((f) => <option key={f.family} value={f.family}>{f.label}</option>)}</optgroup>)}
         </Select>
       </Field>
       <div className="grid grid-cols-2 gap-2">
@@ -240,25 +241,51 @@ function ChartProps({ el, view, doc, patch, k }: P<ChartElement>) {
     <Section title="Chart">
       <Field label="Type">
         <Select value={el.chart} onChange={(e) => patch({ chart: e.target.value as ChartElement["chart"] })}>
-          <option value="bar">Columns</option>
-          <option value="hbar">Bars</option>
+          <option value="bar">Column</option>
+          <option value="hbar">Bar (horizontal)</option>
           <option value="line">Line</option>
+          <option value="pie">Pie</option>
           <option value="donut">Donut</option>
+          <option value="waterfall">Waterfall</option>
+          <option value="histogram">Histogram</option>
+          <option value="scatter">Scatter plot</option>
+          <option value="map">Map</option>
         </Select>
       </Field>
+      {el.chart === "map" && (
+        <Field label="Map" hint="Labels name the regions (e.g. Lagos, FCT, Kano — or Ghana, Kenya)">
+          <Select value={el.map ?? "nigeria"} onChange={(e) => patch({ map: e.target.value as ChartElement["map"] })}>
+            <option value="nigeria">Nigeria — 36 states + FCT</option>
+            <option value="africa">Africa — countries</option>
+          </Select>
+        </Field>
+      )}
+      {el.chart === "scatter" && (
+        <Field label="X values" hint="Comma-separated, one per Y value. Labels: x-axis title, y-axis title">
+          <Input value={(el.xValues ?? []).join(", ")} onChange={(e) => {
+            const vals = e.target.value.split(",").map((v) => Number(v.trim())).filter((v) => Number.isFinite(v));
+            patch({ xValues: vals.slice(0, 60) }, k("xvals"));
+          }} />
+        </Field>
+      )}
       <Field label="Values" hint="Comma-separated numbers">
         <Input value={raw} onChange={(e) => {
           setRaw(e.target.value);
           const vals = e.target.value.split(",").map((v) => Number(v.trim())).filter((v) => Number.isFinite(v));
-          if (vals.length) patch({ values: vals.slice(0, 24) }, k("vals"));
+          if (vals.length) patch({ values: vals.slice(0, 60) }, k("vals"));
         }} />
       </Field>
       <Field label="Labels" hint="Comma-separated">
-        <Input value={el.labels.join(", ")} onChange={(e) => patch({ labels: e.target.value.split(",").map((v) => v.trim()).slice(0, 24) }, k("labels"))} />
+        <Input value={el.labels.join(", ")} onChange={(e) => patch({ labels: e.target.value.split(",").map((v) => v.trim()).slice(0, 60) }, k("labels"))} />
+      </Field>
+      <Field label="Value suffix" hint="e.g. % or k">
+        <Input value={el.unit ?? ""} maxLength={12} onChange={(e) => patch({ unit: e.target.value }, k("unit"))} />
       </Field>
       <div className="flex gap-4 text-sm">
         <label className="flex items-center gap-2"><input type="checkbox" checked={el.showValues} onChange={(e) => patch({ showValues: e.target.checked })} /> Values</label>
         <label className="flex items-center gap-2"><input type="checkbox" checked={el.showLabels} onChange={(e) => patch({ showLabels: e.target.checked })} /> Labels</label>
+        {["bar", "line", "waterfall", "histogram", "scatter"].includes(el.chart) && <label className="flex items-center gap-2"><input type="checkbox" checked={Boolean(el.showGrid)} onChange={(e) => patch({ showGrid: e.target.checked })} /> Grid</label>}
+        {el.chart === "waterfall" && <label className="flex items-center gap-2"><input type="checkbox" checked={el.showTotal !== false} onChange={(e) => patch({ showTotal: e.target.checked })} /> Total</label>}
       </div>
       <ColorField label="Main colour" value={el.color} palette={view.palette} paletteLabels={doc.paletteLabels} onChange={(v) => patch({ color: v })} />
       <ColorField label="Secondary colour" value={el.secondaryColor} palette={view.palette} paletteLabels={doc.paletteLabels} onChange={(v) => patch({ secondaryColor: v })} />
@@ -267,17 +294,33 @@ function ChartProps({ el, view, doc, patch, k }: P<ChartElement>) {
   );
 }
 
+function QrProps({ el, view, doc, patch, k }: P<QrElement>) {
+  const valid = !el.value || /^https?:\/\/\S+$/i.test(el.value.trim());
+  return (
+    <Section title="QR code">
+      <Field label="Link" hint={valid ? "Paste the full form link, e.g. https://forms.gle/…" : "Links should start with https://"}>
+        <Input value={el.value} maxLength={600} placeholder="https://forms.gle/…" onChange={(e) => patch({ value: e.target.value }, k("qr"))} />
+      </Field>
+      <ColorField label="Code colour" value={el.fg} palette={view.palette} paletteLabels={doc.paletteLabels} onChange={(v) => patch({ fg: v })} />
+      <ColorField label="Background" value={el.bg} palette={view.palette} paletteLabels={doc.paletteLabels} onChange={(v) => patch({ bg: v })} />
+      <Range label="Quiet zone" value={el.margin} min={0} max={6} step={1} onChange={(v) => patch({ margin: v }, k("qm"))} />
+      <p className="text-[11px] leading-relaxed text-muted">Keep strong contrast (dark code on a light background) and test-scan the exported flyer with a phone before posting.</p>
+    </Section>
+  );
+}
+
 // ─────────────── quick edit (generated from template labels) ───────────────
-export function QuickEdit({ doc, pageIndex, onText, onPalette, onPickImage, onSelect }: {
+export function QuickEdit({ doc, pageIndex, onText, onQr, onPalette, onPickImage, onSelect }: {
   doc: DesignDoc;
   pageIndex: number;
   onText: (id: string, text: string) => void;
+  onQr: (id: string, value: string) => void;
   onPalette: (key: string, value: string) => void;
   onPickImage: (id: string) => void;
   onSelect: (id: string) => void;
 }) {
   const page = doc.pages[pageIndex];
-  const fields = page.elements.filter((e) => e.label && (e.type === "text" || e.type === "image"));
+  const fields = page.elements.filter((e) => e.label && (e.type === "text" || e.type === "image" || e.type === "qr"));
   return (
     <div>
       <Section title={`Slide ${pageIndex + 1} content`}>
@@ -286,6 +329,10 @@ export function QuickEdit({ doc, pageIndex, onText, onPalette, onPickImage, onSe
           el.type === "text" ? (
             <Field key={el.id} label={el.label!}>
               <TextArea rows={Math.min(5, Math.max(1, Math.ceil(el.text.length / 38)))} value={el.text} onFocus={() => onSelect(el.id)} onChange={(e) => onText(el.id, e.target.value)} />
+            </Field>
+          ) : el.type === "qr" ? (
+            <Field key={el.id} label={el.label!} hint="The QR code updates as you type">
+              <Input value={el.value} placeholder="https://forms.gle/…" onFocus={() => onSelect(el.id)} onChange={(e) => onQr(el.id, e.target.value)} />
             </Field>
           ) : el.type === "image" ? (
             <div key={el.id} className="flex items-center justify-between gap-3 rounded-md border border-line p-2">
@@ -319,7 +366,7 @@ export function QuickEdit({ doc, pageIndex, onText, onPalette, onPickImage, onSe
 }
 
 // ─────────────── add elements ───────────────
-export type AddKind = "heading" | "subheading" | "body" | "rect" | "ellipse" | "line" | "triangle" | "star" | "photo" | "logo" | "bar" | "donut" | "dots" | "hexagon" | "wave" | "dotring" | "noise";
+export type AddKind = "heading" | "subheading" | "body" | "rect" | "ellipse" | "line" | "triangle" | "star" | "photo" | "logo" | "bar" | "donut" | "pie" | "map" | "qr" | "dots" | "hexagon" | "wave" | "dotring" | "noise";
 
 export function AddPanel({ onAdd }: { onAdd: (k: AddKind) => void }) {
   const Tile = ({ k, icon, label }: { k: AddKind; icon: React.ReactNode; label: string }) => (
@@ -354,6 +401,9 @@ export function AddPanel({ onAdd }: { onAdd: (k: AddKind) => void }) {
           <Tile k="photo" icon={<ImageIcon size={18} />} label="Photo" />
           <Tile k="logo" icon={<img src="/brand/dawb-logo-light.svg" alt="" className="h-[18px] w-[18px]" />} label="Logo" />
           <Tile k="bar" icon={<BarChart3 size={18} />} label="Chart" />
+          <Tile k="pie" icon={<span className="text-base leading-none">◔</span>} label="Pie" />
+          <Tile k="map" icon={<span className="text-base leading-none">⌖</span>} label="Map" />
+          <Tile k="qr" icon={<span className="text-base leading-none">▦</span>} label="QR code" />
         </div>
       </Section>
       <p className="px-4 py-3 text-[11px] leading-relaxed text-muted">Shortcuts: Delete · Ctrl+Z / Ctrl+Shift+Z · Ctrl+D duplicate · arrows nudge (Shift = 10px) · double-click text to edit.</p>
@@ -383,6 +433,14 @@ export function makeElement(k: AddKind, view: PageView, id: string): DesignEleme
       return { ...base, type: "chart", name: "Chart", chart: "bar", x: cx - view.width * 0.3, y: cy - view.width * 0.2, width: view.width * 0.6, height: view.width * 0.4, values: [12, 19, 15, 26], labels: ["Q1", "Q2", "Q3", "Q4"], color: "$primary", secondaryColor: "$muted", labelColor: "$ink", showLabels: true, showValues: true, fontFamily: "Nunito Sans" };
     case "donut":
       return { ...makeElement("bar", view, id), chart: "donut" } as ChartElement;
+    case "pie":
+      return { ...makeElement("bar", view, id), name: "Pie chart", chart: "pie", values: [58, 42], labels: ["Female", "Male"], unit: "%" } as ChartElement;
+    case "map":
+      return { ...makeElement("bar", view, id), name: "Map", chart: "map", map: "nigeria", height: view.width * 0.5, values: [40, 25, 18], labels: ["Lagos", "FCT", "Kano"], secondaryColor: "#E3EBEE" } as ChartElement;
+    case "qr": {
+      const s = view.width * 0.24;
+      return { ...base, type: "qr", name: "QR code", label: "QR link", x: cx - s / 2, y: cy - s / 2, width: s, height: s, value: "", fg: "#071C24", bg: "#FFFFFF", margin: 2 };
+    }
     case "noise":
       return { ...base, type: "pattern", name: "Grain", pattern: "noise", x: 0, y: 0, width: view.width, height: view.height, color: "$ink", spacing: 40, size: 2, opacity: 0.6 };
     case "dotring": {

@@ -2,14 +2,18 @@
 
 An internal design and video studio for DAWB Learn: Canva-style editing for carousels and static posts, CapCut-style scene editing for reels and motion graphics, and a template library built from the **From Curiosity to Civilization** campaign calendar (May–August 2025).
 
-- **100+ templates**:
+- **150+ templates**:
+  - **Research & questionnaires (11 flyers, 3 videos):** study announcements (editorial serif, cyan lens), questionnaire calls with a real, scannable **QR code** and form link (white, dark, story, ticket, square data drive, LinkedIn card), and research-team flyers (grid of six, single-member spotlight, swipe carousel) with name, profession and location.
+  - **Data & charts (11 flyers, 3 videos):** column, bar, line, pie, donut, waterfall, histogram, scatter (with trend line) and **maps** (Nigeria's 36 states + FCT, and Africa by country) for applicant numbers by location, gender and track, and research results (a five-slide findings carousel with methodology). All figures are labelled sample data.
+  - **Training (10 flyers, 9 videos):** Power BI, Excel, SQL, SPSS, Python, R, Tableau, Article Writing and Research Methods, each with an original animated illustration (no product logos), plus an all-tracks catalogue.
   - **Logo motion (3, with sound design):** *Assemble* (dark: scan line, emblem draws, facets click in, impact + light sweep), *Signal* (cyan: halftone pulse, glitch-slice lock-in, chime) and *Prism* (white: hexagon wall flips away, 3D rise, typeset letters, shimmer). All are animated from the exact geometry of the three official logo files.
   - **Beyond The Dashboard (BTD):** 10 flyers (bento, cyan monogram, night terminal, editorial issue, speaker story, tomorrow reminder, panel, live-now story, LinkedIn banner, thank-you recap) and 3 videos (promo reel, speaker announcement, 16:9 starting-soon screen).
   - **Occasions:** Christmas, New Year, New Month, Happy Birthday and Happy Weekend flyers (16 concepts across white, cyan, dark, emerald, black & gold, warm paper and pastel), each with a matching motion video.
   - **Campaign calendar:** the 32-post “From Curiosity to Civilization” set (carousels, statics, reels, motion graphics).
 - **Sound:** a built-in, royalty-free library generated in code (`scripts/synth-audio.mjs`): 4 music beds (Pulse, Celebrate, Festive, Ambient) and 8 effects (whoosh, impact, click, pop, chime, shimmer, riser, glitch). Any scene can trigger an effect, and any video can use a bed or an uploaded track.
 - **Texture system:** film grain, dot grids, halftone, topographic contours, dotted orbits/lines, glow, gradients and outlined type, in both the design editor and video scenes.
-- **Brand type:** Nunito Sans and Nunito (self-hosted), with JetBrains Mono for code.
+- **Brand type:** Nunito Sans and Nunito (self-hosted), plus a curated set of professional, open-licence fonts: Inter, Manrope, DM Sans, Plus Jakarta Sans, IBM Plex Sans, Space Grotesk, Fraunces, Source Serif 4, Playfair Display, Instrument Serif, Cormorant Garamond, JetBrains Mono and IBM Plex Mono. Font menus are grouped (sans / serif / mono) and the Brand page says what each is for.
+- **QR codes and charts in the editor:** *Add → QR code* encodes any link as sharp vector squares; *Add → Chart / Pie / Map* and the chart panel cover all nine chart types, value suffixes (%, k), gridlines and waterfall totals.
 - **Design editor**: drag, resize, rotate, snap guides, edit text inline or in panels, fonts and colours, photo upload/replace/crop/zoom, shapes, textures, charts, layer order, duplicate, lock, undo/redo, multiple slides, PNG/JPEG export (1× or 2×), and all slides as a ZIP.
 - **Video studio**: a live Remotion preview, a scene timeline (reorder, duplicate, delete, add), per-scene content, duration, transitions, camera motion and textures, aspect presets (9:16, 4:5, 1:1, 16:9), theme colours and fonts, background music, and MP4/WebM export.
 - **Projects**: save, autosave, reopen, duplicate, favourite, delete, conflict protection between teammates, and export history.
@@ -99,12 +103,15 @@ src/
   lib/video/              Video document model, scene definitions, schema, render client
   lib/templates/          Template registry: design/phase1-4.ts, frames.ts, video/reels.ts, motion.ts
   lib/server/             Config, storage drivers (fs | Vercel Blob), auth, repository, render jobs
-  remotion/               The one composition (DawbVideo) + 15 scene components + Remotion entry
+  lib/charts.ts, lib/qr.ts, lib/geo/   Chart maths + validated palettes, QR encoding, map outlines
+  remotion/               The one composition (DawbVideo) + 23 scene components + Remotion entry
 ```
 
 - **One renderer per medium.** Designs are drawn by the same Konva components in the editor, the template thumbnails and the PNG/JPEG export, so exports match the screen. Videos are a single Remotion composition that the editor preview, browser export and server export all share.
 - **Editable documents, not flat images.** A design is JSON: pages → elements (text, image, shape, texture, chart) with palette tokens (`$primary`, `$ink`…), so recolouring a template changes every slide. A video is JSON: scenes with typed props, backgrounds and transitions.
 - **Generated controls.** The *Quick edit* panel lists every element a template labels. Video scene panels are generated from `lib/video/scenes.ts` field definitions.
+- **Adding a font.** `npm i @fontsource/<font>`, add one entry to `FONTS` in `src/lib/fonts.ts`, then run `npm run fonts:sync`. That regenerates `src/app/fonts.css` (editor and PNG export) and `src/remotion/fonts.ts` (server video renders) so every surface loads the same files. Use open-licence (OFL) fonts only.
+- **Maps.** `src/lib/geo/maps.ts` holds pre-projected outlines generated from Natural Earth (public domain) by `npm run maps:build`; the app ships no GIS libraries. Chart labels match states/countries by name, code or common alias (e.g. "Abuja" → FCT, "Ivory Coast").
 - **Adding a template.** Write a `defineDesign({...})` or video template in `lib/templates/…`, add it to the phase array, and it appears in the library. The unit tests validate every template.
 - **Security.** All API routes check access on the server: the allowlist is re-checked on every request, documents are validated with zod, uploads are identified by magic bytes (PNG, JPEG, WebP, MP3, WAV, M4A, OGG; no SVG or HTML), assets are served with `nosniff` and a sandbox CSP, writes reject cross-origin requests, and there is optimistic locking (HTTP 409) on concurrent saves. Only the creator or an admin can delete a project or asset.
 
@@ -114,7 +121,7 @@ src/
 
 ```bash
 npm run typecheck      # TypeScript
-npm test               # 95 unit tests: every template validates; storage, permissions, conflicts, sniffing, allowlist, timeline
+npm test               # 150 unit tests: every template validates; storage, permissions, conflicts, sniffing, allowlist, timeline
 npm run build          # production build
 npm run render:test    # server-render the sample composition → out/render-test.mp4
 npx tsx scripts/render-template.ts logo-assemble v-btd-promo   # render any video template → out/<id>.mp4
@@ -125,6 +132,7 @@ npm run test:e2e       # against a running app: edit → save → reopen → PNG
 
 ## 5. Notes and limitations
 
+- **Sample content.** Chart figures, names ("Member Name"), dates ("00 Month"), fees ("₦00,000") and "[your form link]" are placeholders. Each chart template carries a *Data note / source* field to replace with the real source. QR codes default to www.dawblearn.org until you paste the form link into the *Questionnaire link* field; test-scan every exported flyer.
 - **Photos.** The calendar asks for photography and historical illustrations that weren't supplied, so photo slots are marked placeholders showing the calendar's suggested image (for example “Ishango Bone photo”). Upload real images in *Brand assets* or straight into a slot. Bracketed fields such as `[Graduate Name]` and `X%` come from the calendar and must be replaced with real details.
 - **Logo files.** The three official SVGs (dark, light, cyan) are used exactly as supplied; each carries its own background square, so templates pick the file that matches the surface (or place it on a badge on other colours). Uploading a transparent logo version is recommended for photos and other colours.
 - **Browser video export** needs Chrome or Edge (WebCodecs). Where H.264 encoding isn't available, it falls back to WebM (VP9). The server export always produces H.264 MP4.

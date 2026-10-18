@@ -88,8 +88,8 @@ export function BrandPage() {
         <div className="mt-4 divide-y divide-line rounded-md border border-line bg-white">
           {FONTS.map((f) => (
             <div key={f.family} className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-baseline sm:justify-between">
-              <span style={{ fontFamily: `"${f.family}"`, fontSize: 26, fontWeight: f.weights.includes(700) ? 700 : 400 }}>Research built civilization.</span>
-              <span className="text-xs text-muted">{f.family} · {f.family === "Nunito" ? "Display & headlines" : f.family === "Nunito Sans" ? "Body, UI & headlines" : f.category === "mono" ? "Data labels / code" : "Supporting"}</span>
+              <span style={{ fontFamily: `"${f.family}"`, fontSize: 26, fontWeight: f.weights.includes(700) ? 700 : 400 }}>{f.category === "mono" ? "SELECT region, COUNT(*) FROM applicants;" : "Research built civilization."}</span>
+              <span className="text-xs text-muted">{f.family} · {f.use ?? f.category}</span>
             </div>
           ))}
         </div>

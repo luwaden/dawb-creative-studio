@@ -54,7 +54,8 @@ function VideoThumb({ template }: { template: Extract<Template, { kind: "video" 
   const doc = useMemo(() => template.build(), [template]);
   const a = ASPECTS[doc.aspect];
   // Show the first scene once its intro animation has settled.
-  const settle = doc.scenes[0].type === "logo-reveal" ? 125 : doc.scenes[0].type === "greeting" || doc.scenes[0].type === "month" ? 75 : 55;
+  const first = doc.scenes[0].type;
+  const settle = first === "logo-reveal" ? 125 : first === "data-chart" ? 110 : first === "qr-call" || first === "team" || first === "training" ? 90 : first === "greeting" || first === "month" ? 75 : 55;
   const frame = Math.min(getSceneStarts(doc)[0] + settle, doc.scenes[0].durationInFrames - 5);
   return (
     <div ref={ref} className="relative w-full overflow-hidden bg-ink" style={{ aspectRatio: `${a.width} / ${a.height}` }}>

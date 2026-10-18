@@ -166,6 +166,7 @@ export function DesignEditor({ initialDoc, initialMeta, templateId, initialName 
             doc={doc}
             pageIndex={pageIndex}
             onText={(id, text) => patchEl(id, { text }, `${id}:text`)}
+            onQr={(id, value) => patchEl(id, { value }, `${id}:qr`)}
             onPalette={(key, value) => mutate((d) => ({ ...d, palette: { ...d.palette, [key]: value } }), `pal:${key}`)}
             onPickImage={(id) => {
               const el = view.elements.find((e) => e.id === id);

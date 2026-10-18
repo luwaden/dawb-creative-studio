@@ -101,7 +101,8 @@ export interface PatternElement extends BaseElement {
   size: number;
 }
 
-export type ChartKind = "bar" | "line" | "donut" | "hbar";
+/** bar = vertical columns, hbar = horizontal bars. */
+export type ChartKind = "bar" | "hbar" | "line" | "donut" | "pie" | "waterfall" | "histogram" | "scatter" | "map";
 
 export interface ChartElement extends BaseElement {
   type: "chart";
@@ -114,9 +115,31 @@ export interface ChartElement extends BaseElement {
   showLabels: boolean;
   showValues: boolean;
   fontFamily: string;
+  /** Suffix for value labels, e.g. "%" or "k". */
+  unit?: string;
+  /** Faint value gridlines + baseline (column, bar, line, waterfall, histogram, scatter). */
+  showGrid?: boolean;
+  /** Scatter: x for each point (values are y). */
+  xValues?: number[];
+  /** Pie/donut slice colours in order; falls back to the categorical chart palette. */
+  colors?: ColorValue[];
+  /** Map chart: which map; labels name regions ("Lagos", "FCT", "Ghana"), values shade them. */
+  map?: "nigeria" | "africa";
+  /** Waterfall: draw a final total bar. */
+  showTotal?: boolean;
 }
 
-export type DesignElement = TextElement | ImageElement | ShapeElement | PatternElement | ChartElement;
+/** QR code that encodes a link (e.g. a questionnaire form). Drawn as vector squares, so it stays sharp at any export size. */
+export interface QrElement extends BaseElement {
+  type: "qr";
+  value: string;
+  fg: ColorValue;
+  bg: ColorValue;
+  /** Quiet zone in modules (QR spec recommends 4; 2 is fine on a plain panel). */
+  margin: number;
+}
+
+export type DesignElement = TextElement | ImageElement | ShapeElement | PatternElement | ChartElement | QrElement;
 export type ElementType = DesignElement["type"];
 
 export interface DesignBackground {
