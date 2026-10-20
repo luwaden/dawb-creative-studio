@@ -138,3 +138,5 @@ npm run test:e2e       # against a running app: edit → save → reopen → PNG
 - **Browser video export** needs Chrome or Edge (WebCodecs). Where H.264 encoding isn't available, it falls back to WebM (VP9). The server export always produces H.264 MP4.
 - **Remotion licence.** Remotion is free for individuals and companies with up to 3 employees; larger organisations need a company licence from remotion.pro. Check this applies to DAWB before wide use.
 - **Not yet built:** real-time co-editing (saves are protected by conflict detection instead), AI-assisted copy and imagery (the app works fully without AI), desktop installer packaging, Google Drive/Sheets integration.
+#   d a w b - c r e a t i v e - s t u d i o  
+ 
