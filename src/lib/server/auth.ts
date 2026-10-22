@@ -2,6 +2,7 @@ import "server-only";
 import type { NextAuthOptions } from "next-auth";
 import { getServerSession } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import { getToken } from "next-auth/jwt";
 import { getConfig } from "./config";
 
 export interface AppUser {
@@ -27,7 +28,16 @@ export function buildAuthOptions(): NextAuthOptions {
     secret: process.env.NEXTAUTH_SECRET,
     session: { strategy: "jwt", maxAge: 60 * 60 * 24 * 14 },
     providers: cfg.googleConfigured
-      ? [GoogleProvider({ clientId: process.env.GOOGLE_CLIENT_ID!, clientSecret: process.env.GOOGLE_CLIENT_SECRET! })]
+      ? [
+          GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID!,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+            // Ask for Sheets access only when Sheets runs on each user's own account.
+            ...(process.env.SHEETS_AUTH === "user"
+              ? { authorization: { params: { scope: "openid email profile https://www.googleapis.com/auth/spreadsheets", access_type: "offline", prompt: "consent" } } }
+              : {}),
+          }),
+        ]
       : [],
     pages: { signIn: "/signin", error: "/signin" },
     callbacks: {
@@ -36,8 +46,32 @@ export function buildAuthOptions(): NextAuthOptions {
         const verified = (profile as { email_verified?: boolean } | undefined)?.email_verified !== false;
         return verified && isEmailAllowed(email);
       },
+      async jwt({ token, account }) {
+        // Keep Google tokens inside the encrypted session cookie (never sent to the browser as data).
+        if (account?.provider === "google" && process.env.SHEETS_AUTH === "user") {
+          token.gAccess = account.access_token;
+          token.gRefresh = account.refresh_token ?? token.gRefresh;
+          token.gExpires = account.expires_at;
+        }
+        return token;
+      },
       async session({ session }) {
         return session;
+      },
+    },
+    events: {
+      async signIn({ user, account, profile }) {
+        const email = ((profile as { email?: string } | undefined)?.email ?? user?.email ?? "").toLowerCase();
+        if (!email || !isEmailAllowed(email)) return;
+        const { recordSignIn } = await import("./sheets");
+        // Bounded so a slow Sheets API never holds up sign-in.
+        await Promise.race([
+          recordSignIn(
+            { email, name: user?.name, image: user?.image, isAdmin: getConfig().adminEmails.includes(email) },
+            account ? { accessToken: account.access_token, refreshToken: account.refresh_token, expiresAt: account.expires_at, email } : null,
+          ),
+          new Promise((r) => setTimeout(r, 4000)),
+        ]);
       },
     },
   };
@@ -75,6 +109,14 @@ export class HttpError extends Error {
   constructor(public status: number, message: string) {
     super(message);
   }
+}
+
+/** The signed-in user's Google tokens (SHEETS_AUTH=user only), read from the encrypted session cookie. */
+export async function getUserGoogleTokens(req: Request): Promise<{ accessToken?: string; refreshToken?: string; expiresAt?: number; email?: string } | null> {
+  if (process.env.SHEETS_AUTH !== "user" || !process.env.NEXTAUTH_SECRET) return null;
+  const t = await getToken({ req: req as unknown as Parameters<typeof getToken>[0]["req"], secret: process.env.NEXTAUTH_SECRET }).catch(() => null);
+  if (!t) return null;
+  return { accessToken: t.gAccess as string | undefined, refreshToken: t.gRefresh as string | undefined, expiresAt: t.gExpires as number | undefined, email: t.email ?? undefined };
 }
 
 export async function requireUser(): Promise<AppUser> {

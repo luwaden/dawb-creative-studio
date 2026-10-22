@@ -103,3 +103,75 @@ export function sampleNote(b: K, x: number, y: number, w: number, color: string,
 export function eyebrow(b: K, text: string, x: number, y: number, w: number, color: string, o: { font?: string; size?: number; label?: string } = {}): DesignElement {
   return b.text(text, { x, y, w, fontFamily: o.font ?? "IBM Plex Mono", fontSize: o.size ?? 22, fontWeight: 500, fill: color, letterSpacing: 3, uppercase: true, label: o.label ?? "Eyebrow", name: o.label ?? "Eyebrow" });
 }
+
+// ───────────── data-driven templates ─────────────
+import { createBuilder, doc as makeDoc, page as makePage } from "@/lib/design/build";
+import { normalizeRecord, type SheetRecord } from "@/lib/sheets/schema";
+import type { DesignTemplate, FormatId } from "../types";
+import { DESIGN_FORMATS } from "../types";
+import type { Pal } from "./kit";
+
+const PAL_LABELS = { paper: "Background", surface: "Panels", ink: "Main text", muted: "Secondary text", primary: "DAWB teal", accent: "Accent" };
+
+/** Like defineArt, but the pages are a function of one Sheets row, so the Data page can personalise it. */
+export function defineDataArt(
+  meta: Omit<DesignTemplate, "kind" | "build" | "buildFrom" | "phase" | "post"> & { pal: Pal | ((rec: SheetRecord) => Pal); sample: SheetRecord; pages: (b: K, rec: SheetRecord) => Array<{ name: string; bg?: string; els: DesignElement[] }> },
+): DesignTemplate {
+  const { pal, pages, sample, ...rest } = meta;
+  const f = DESIGN_FORMATS[meta.format as FormatId];
+  const buildFrom = (raw: SheetRecord) => {
+    const rec = safeRecord(meta.dataSource ? normalizeRecord(meta.dataSource, raw) : raw);
+    const b = createBuilder(`${meta.id.slice(0, 12)}-`);
+    const palette = typeof pal === "function" ? pal(rec) : pal;
+    return makeDoc(f.width, f.height, { palette: { ...palette }, paletteLabels: PAL_LABELS }, pages(b, rec).map((p) => makePage(p.bg ?? "$paper", p.els, { name: p.name })));
+  };
+  return { ...rest, kind: "design", phase: null, post: null, build: () => buildFrom(sample), buildFrom };
+}
+
+/** Only same-origin photos reach the canvas (external images would block PNG export). */
+export function safeRecord(rec: SheetRecord): SheetRecord {
+  const out: SheetRecord = {};
+  for (const [k, v] of Object.entries(rec)) out[k] = typeof v === "string" ? v : String(v ?? "");
+  if (out.photo_url && !out.photo_url.startsWith("/")) out.photo_url = "";
+  return out;
+}
+
+/** Rough line count for wrapping text (Nunito-ish average glyph width). */
+export function estLines(text: string, fontSize: number, width: number, factor = 0.5): number {
+  return (text || "").split("\n").reduce((n, para) => n + Math.max(1, Math.ceil((para.length * fontSize * factor) / width)), 0);
+}
+
+/** Font size that keeps text within a number of lines. */
+export function fitSize(text: string, width: number, maxLines: number, max: number, min: number, factor = 0.5): number {
+  for (let s = max; s > min; s -= 2) if (estLines(text, s, width, factor) <= maxLines) return s;
+  return min;
+}
+
+/** Wrapping outlined chips (e.g. expertise). Returns elements and the bottom y. */
+export function chipRow(b: K, items: string[], x: number, y: number, maxW: number, o: { color: string; fill?: string; stroke?: string; size?: number; label?: string }): { els: DesignElement[]; bottom: number } {
+  const fs = o.size ?? 22;
+  const h = fs * 2;
+  let cx = x;
+  let cy = y;
+  const els: DesignElement[] = [];
+  items.slice(0, 6).forEach((t, i) => {
+    const w = Math.round(t.length * fs * 0.6 + fs * 1.8);
+    if (cx + w > x + maxW && cx > x) {
+      cx = x;
+      cy += h + 10;
+    }
+    els.push(b.rect({ x: cx, y: cy, w, h, fill: o.fill ?? "transparent", stroke: o.stroke ?? o.color, strokeWidth: o.fill ? 0 : 2, cornerRadius: h / 2, name: `${o.label ?? "Chip"} ${i + 1} bg` }));
+    els.push(b.text(t, { x: cx, y: cy, w, h, verticalAlign: "middle", align: "center", fontFamily: "Nunito Sans", fontSize: fs, fontWeight: 800, fill: o.color, label: `${o.label ?? "Chip"} ${i + 1}`, name: `${o.label ?? "Chip"} ${i + 1}` }));
+    cx += w + 10;
+  });
+  return { els, bottom: items.length ? cy + h : y };
+}
+
+export function splitList(v: string | undefined, max = 6): string[] {
+  return (v ?? "").split(/[,\n·]/).map((s) => s.trim()).filter(Boolean).slice(0, max);
+}
+
+/** Pill width that fits uppercase, letter-spaced labels (the kit's default runs narrow for long text). */
+export function pillW(text: string, fs: number): number {
+  return Math.round(text.length * fs * 0.84 + fs * 2.8);
+}

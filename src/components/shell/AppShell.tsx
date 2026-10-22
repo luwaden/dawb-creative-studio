@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { FolderOpen, Home, LayoutTemplate, LogOut, Menu, Palette, X } from "lucide-react";
+import { FolderOpen, Home, LayoutTemplate, LogOut, Menu, Palette, Sheet, X } from "lucide-react";
 import { cx, Toaster } from "@/components/ui";
 import { useWorkspace } from "./WorkspaceProvider";
 
@@ -12,6 +12,7 @@ const NAV = [
   { href: "/templates", label: "Templates", icon: LayoutTemplate },
   { href: "/projects", label: "My projects", icon: FolderOpen },
   { href: "/brand", label: "Brand assets", icon: Palette },
+  { href: "/data", label: "Sheets data", icon: Sheet },
 ];
 
 function WorkspaceBadge() {

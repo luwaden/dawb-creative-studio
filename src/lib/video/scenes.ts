@@ -27,6 +27,58 @@ export interface SceneDefinition {
 const alignField: FieldDef = { key: "align", label: "Alignment", type: "select", options: [{ value: "left", label: "Left" }, { value: "center", label: "Center" }] };
 
 export const SCENE_DEFINITIONS: Record<SceneType, SceneDefinition> = {
+  "speaker-profile": {
+    type: "speaker-profile",
+    label: "Speaker profile",
+    description: "Animated speaker introduction: photo reveal, name, role, bio, expertise and webinar details",
+    defaultDuration: 210,
+    fields: [
+      { key: "series", label: "Series", type: "text" },
+      { key: "name", label: "Name", type: "text" },
+      { key: "role", label: "Role", type: "text" },
+      { key: "organisation", label: "Organisation", type: "text" },
+      { key: "bio", label: "Bio", type: "textarea", rows: 4, max: 420 },
+      { key: "expertise", label: "Expertise (comma-separated)", type: "text" },
+      { key: "image", label: "Photo", type: "image" },
+      { key: "webinarTitle", label: "Webinar title", type: "text" },
+      { key: "date", label: "Date", type: "text" },
+      { key: "time", label: "Time", type: "text" },
+      { key: "platform", label: "Platform", type: "text" },
+    ],
+    defaults: { series: "Beyond The Dashboard", name: "Speaker Name", role: "Role", organisation: "Organisation", bio: "", expertise: "", image: "", webinarTitle: "Webinar title", date: "Day, 00 Month", time: "00:00 WAT", platform: "Google Meet" },
+  },
+  testimonial: {
+    type: "testimonial",
+    label: "Trainee quote",
+    description: "A trainee's quote revealed word by word with photo, occupation, location and progress",
+    defaultDuration: 210,
+    fields: [
+      { key: "quote", label: "Quote", type: "textarea", rows: 4, max: 320 },
+      { key: "name", label: "Name", type: "text" },
+      { key: "occupation", label: "Occupation", type: "text" },
+      { key: "location", label: "Location", type: "text" },
+      { key: "image", label: "Photo", type: "image" },
+      { key: "track", label: "Track", type: "text" },
+      { key: "progress", label: "Progress (e.g. Week 6 of 8)", type: "text" },
+    ],
+    defaults: { quote: "What I learned…", name: "Trainee Name", occupation: "", location: "", image: "", track: "", progress: "" },
+  },
+  "formula-lesson": {
+    type: "formula-lesson",
+    label: "Formula explainer",
+    description: "Types a formula, highlights the cells it uses and pops the result (Excel grid or Power BI card)",
+    defaultDuration: 210,
+    fields: [
+      { key: "tool", label: "Tool", type: "select", options: [{ value: "Excel", label: "Excel" }, { value: "Google Sheets", label: "Google Sheets" }, { value: "Power BI", label: "Power BI" }] },
+      { key: "functionName", label: "Function / concept", type: "text" },
+      { key: "formula", label: "Formula", type: "text", max: 160 },
+      { key: "table", label: "Example data (rows on new lines, cells separated by |)", type: "textarea", rows: 5, max: 600 },
+      { key: "resultCell", label: "Result cell (Excel, e.g. B6)", type: "text", max: 8 },
+      { key: "result", label: "Result", type: "text" },
+      { key: "caption", label: "Caption", type: "textarea", rows: 2 },
+    ],
+    defaults: { tool: "Excel", functionName: "SUM", formula: "=SUM(B2:B5)", table: "Month | Sales\nJan | 1200\nFeb | 850\nMar | 430\nApr | 990", resultCell: "B6", result: "3470", caption: "" },
+  },
   "data-chart": {
     type: "data-chart",
     label: "Data chart",

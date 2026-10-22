@@ -1,6 +1,9 @@
 import { FRAMES } from "./design/frames";
 import { BTD } from "./design/btd";
 import { DATA_FLYERS } from "./design/data";
+import { LESSON_CAROUSELS } from "./design/lessons";
+import { QUOTE_FLYERS } from "./design/quotes";
+import { SPEAKER_FLYERS } from "./design/speakers";
 import { RESEARCH } from "./design/research";
 import { TRAINING } from "./design/training";
 import { OCCASIONS } from "./design/occasions";
@@ -12,6 +15,7 @@ import { MOTION } from "./video/motion";
 import { LOGO_MOTIONS } from "./video/logos";
 import { OCCASION_VIDEOS } from "./video/occasions";
 import { RESEARCH_VIDEOS } from "./video/research";
+import { PEOPLE_VIDEOS } from "./video/people";
 import { REELS } from "./video/reels";
 import { CATEGORIES, PHASES, type Template } from "./types";
 
@@ -19,8 +23,8 @@ import { CATEGORIES, PHASES, type Template } from "./types";
  * Template registry. Add a template by exporting it from a phase file and listing
  * it here — the library, editor and quick-edit panel pick it up automatically.
  */
-export const DESIGN_TEMPLATES: Template[] = [...RESEARCH, ...DATA_FLYERS, ...TRAINING, ...BTD, ...OCCASIONS, ...PHASE1, ...PHASE2, ...PHASE3, ...PHASE4, ...FRAMES];
-export const VIDEO_TEMPLATES: Template[] = [...RESEARCH_VIDEOS, ...LOGO_MOTIONS, ...OCCASION_VIDEOS, ...REELS, ...MOTION];
+export const DESIGN_TEMPLATES: Template[] = [...SPEAKER_FLYERS, ...LESSON_CAROUSELS, ...QUOTE_FLYERS, ...RESEARCH, ...DATA_FLYERS, ...TRAINING, ...BTD, ...OCCASIONS, ...PHASE1, ...PHASE2, ...PHASE3, ...PHASE4, ...FRAMES];
+export const VIDEO_TEMPLATES: Template[] = [...PEOPLE_VIDEOS, ...RESEARCH_VIDEOS, ...LOGO_MOTIONS, ...OCCASION_VIDEOS, ...REELS, ...MOTION];
 
 export const ALL_TEMPLATES: Template[] = [...DESIGN_TEMPLATES, ...VIDEO_TEMPLATES];
 

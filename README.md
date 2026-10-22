@@ -2,7 +2,11 @@
 
 An internal design and video studio for DAWB Learn: Canva-style editing for carousels and static posts, CapCut-style scene editing for reels and motion graphics, and a template library built from the **From Curiosity to Civilization** campaign calendar (May–August 2025).
 
-- **150+ templates**:
+- **Google Sheets data + automated personalisation (team only):** only DAWB team members sign in and use the Sheet; trainees and speakers never log in — their details are entered by the team. Trainees, speakers and class lessons live in a Google Sheet. The *Sheets data* page lists, adds and edits rows; pick rows and templates and the studio generates a personalised project for each (photos imported, thumbnails made) and logs it in a *Content* tab. Sign-ins are recorded in a *Users* tab. Trainee content is only generated when Consent = Yes.
+- **180+ templates**:
+  - **Webinar speaker profiles (5 flyers, 3 videos):** editorial, cyan spotlight, dark split portrait, story and LinkedIn banner; animated intros in 9:16, 16:9 and 1:1 with a circular photo reveal, name in motion, bio word by word, expertise chips and a live-webinar card.
+  - **Class learning carousels (6 carousels, 4 videos):** six slides each — cover, what it does, syntax with arguments, a worked example (spreadsheet grid with highlighted cells, or Power BI table + card), pro tip and recap — for Excel SUM, AVERAGE, CONCATENATE and Power BI Measures, CALCULATE, DIVIDE. Explainer videos type the formula, light up the cells it uses and pop the result. Any Lessons row rebuilds them.
+  - **Trainee learning quotes (5 flyers, 3 videos):** editorial serif, cyan polaroid, dark photo hero, minimal square and story with a progress tracker drawn from “Week 6 of 8”; motion versions reveal the quote word by word.
   - **Research & questionnaires (11 flyers, 3 videos):** study announcements (editorial serif, cyan lens), questionnaire calls with a real, scannable **QR code** and form link (white, dark, story, ticket, square data drive, LinkedIn card), and research-team flyers (grid of six, single-member spotlight, swipe carousel) with name, profession and location.
   - **Data & charts (11 flyers, 3 videos):** column, bar, line, pie, donut, waterfall, histogram, scatter (with trend line) and **maps** (Nigeria's 36 states + FCT, and Africa by country) for applicant numbers by location, gender and track, and research results (a five-slide findings carousel with methodology). All figures are labelled sample data.
   - **Training (10 flyers, 9 videos):** Power BI, Excel, SQL, SPSS, Python, R, Tableau, Article Writing and Research Methods, each with an original animated illustration (no product logos), plus an all-tracks catalogue.
@@ -88,7 +92,24 @@ Put the shared variables (Blob token, Google credentials, allowlist) in `.env.lo
 
 ---
 
-## 3. How it works
+## 3. Google Sheets (trainees, speakers, lessons)
+
+1. Create a Google Sheet (it can be empty) and copy its link.
+2. In Google Cloud Console (the project that holds your OAuth client): *APIs & Services → Library → Google Sheets API → Enable*.
+3. **Recommended — service account:** *IAM & Admin → Service accounts → Create*, then *Keys → Add key → JSON*. Share the Sheet with the service account's email as **Editor**.
+4. Set `GOOGLE_SHEETS_ID`, `GOOGLE_SERVICE_ACCOUNT_EMAIL` and `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` (see `.env.example`) in Vercel or `.env.local`, then restart.
+   - *Alternative:* `SHEETS_AUTH=user` uses each signed-in person's own Google account instead. Add the `…/auth/spreadsheets` scope to the OAuth consent screen; external (non-Workspace) apps show Google's “unverified app” notice until verified.
+5. Open **Sheets data → Prepare spreadsheet** (admins). It creates the tabs **Trainees, Speakers, Lessons, Content, Users**, adds any missing header columns and gives every row an ID. Existing columns are kept; headers can be reordered or renamed to common variants (e.g. “Full name”, “Photo URL”).
+
+**Columns.** *Trainees:* name, occupation, location, photo, track, cohort, quote, progress, consent, status. *Speakers:* name, role, organisation, bio, expertise, photo, webinar title, series, date, time, platform, registration link, status. *Lessons:* tool, function/concept, topic, what it does, use it when, syntax, arguments, example data (rows on new lines, cells split with `|`), example formula, result cell, result, tip, next class.
+
+**Photos.** Use an https image link, a Google Drive link shared “Anyone with the link”, or pick an uploaded photo (stored as `asset:<id>`). Photos are copied into the studio when content is generated. Private/internal addresses are refused.
+
+**Security.** Credentials stay on the server; values are written as plain text (RAW), so a quote starting with `=` is never run as a formula; edits target rows by ID, not row number; the Users tab is written only by sign-in; preparing the spreadsheet is admin-only.
+
+---
+
+## 4. How it works
 
 ```
 src/
@@ -117,24 +138,26 @@ src/
 
 ---
 
-## 4. Checks
+## 5. Checks
 
 ```bash
 npm run typecheck      # TypeScript
-npm test               # 150 unit tests: every template validates; storage, permissions, conflicts, sniffing, allowlist, timeline
+npm test               # 212 unit tests (incl. Sheets client against a fake API): every template validates; storage, permissions, conflicts, sniffing, allowlist, timeline
 npm run build          # production build
 npm run render:test    # server-render the sample composition → out/render-test.mp4
 npx tsx scripts/render-template.ts logo-assemble v-btd-promo   # render any video template → out/<id>.mp4
 npm run test:e2e       # against a running app: edit → save → reopen → PNG, ZIP, browser + server video export
+npm run test:e2e:sheets  # after npm run build: starts the app + a fake Sheets API — prepare → add → generate → content log
 ```
 
 ---
 
-## 5. Notes and limitations
+## 6. Notes and limitations
 
 - **Sample content.** Chart figures, names ("Member Name"), dates ("00 Month"), fees ("₦00,000") and "[your form link]" are placeholders. Each chart template carries a *Data note / source* field to replace with the real source. QR codes default to www.dawblearn.org until you paste the form link into the *Questionnaire link* field; test-scan every exported flyer.
 - **Photos.** The calendar asks for photography and historical illustrations that weren't supplied, so photo slots are marked placeholders showing the calendar's suggested image (for example “Ishango Bone photo”). Upload real images in *Brand assets* or straight into a slot. Bracketed fields such as `[Graduate Name]` and `X%` come from the calendar and must be replaced with real details.
 - **Logo files.** The three official SVGs (dark, light, cyan) are used exactly as supplied; each carries its own background square, so templates pick the file that matches the surface (or place it on a badge on other colours). Uploading a transparent logo version is recommended for photos and other colours.
 - **Browser video export** needs Chrome or Edge (WebCodecs). Where H.264 encoding isn't available, it falls back to WebM (VP9). The server export always produces H.264 MP4.
 - **Remotion licence.** Remotion is free for individuals and companies with up to 3 employees; larger organisations need a company licence from remotion.pro. Check this applies to DAWB before wide use.
+- **Sheets sync is on demand.** The Data page reads the sheet when you open a tab or press Refresh; generated projects are snapshots (re-generate after editing a row).
 - **Not yet built:** real-time co-editing (saves are protected by conflict detection instead), AI-assisted copy and imagery (the app works fully without AI), desktop installer packaging, Google Drive/Sheets integration.

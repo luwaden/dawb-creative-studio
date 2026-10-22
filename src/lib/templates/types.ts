@@ -1,5 +1,6 @@
 import type { DesignDoc } from "@/lib/design/types";
 import type { AspectId, VideoDoc } from "@/lib/video/types";
+import type { SheetRecord } from "@/lib/sheets/schema";
 
 /** Template categories follow the campaign calendar's formats. */
 export type CategoryId =
@@ -19,6 +20,9 @@ export type CategoryId =
   | "research"
   | "data"
   | "training"
+  | "speakers"
+  | "lessons"
+  | "quotes"
   | "christmas"
   | "newyear"
   | "newmonth"
@@ -32,6 +36,9 @@ export interface Category {
 
 export const CATEGORIES: Category[] = [
   { id: "btd", label: "Beyond The Dashboard" },
+  { id: "speakers", label: "Speaker profiles" },
+  { id: "lessons", label: "Class learning carousels" },
+  { id: "quotes", label: "Trainee quotes" },
   { id: "research", label: "Research & questionnaires" },
   { id: "data", label: "Data & charts" },
   { id: "training", label: "Training" },
@@ -89,18 +96,23 @@ interface TemplateBase {
   description: string;
   /** Visual direction, e.g. "Editorial typography" */
   style: string;
+  /** Google Sheets tab whose rows can personalise this template (Data page → Generate). */
+  dataSource?: "trainees" | "speakers" | "lessons";
 }
 
 export interface DesignTemplate extends TemplateBase {
   kind: "design";
   format: FormatId;
   build: () => DesignDoc;
+  /** Builds the design from one Sheets row (photo fields already imported as asset URLs). */
+  buildFrom?: (rec: SheetRecord) => DesignDoc;
 }
 
 export interface VideoTemplate extends TemplateBase {
   kind: "video";
   aspect: AspectId;
   build: () => VideoDoc;
+  buildFrom?: (rec: SheetRecord) => VideoDoc;
 }
 
 export type Template = DesignTemplate | VideoTemplate;
