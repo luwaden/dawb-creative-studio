@@ -1,4 +1,5 @@
 import "server-only";
+import { HttpError } from "./auth";
 import fs from "node:fs/promises";
 import { createReadStream } from "node:fs";
 import path from "node:path";
@@ -146,7 +147,15 @@ class BlobStorage implements Storage {
   async writeFile(key: string, data: Buffer, contentType: string) {
     assertSafeKey(key);
     const { put } = await this.sdk();
-    await put(key, data, { access: "private", allowOverwrite: true, addRandomSuffix: false, contentType });
+    try {
+      await put(key, data, { access: "private", allowOverwrite: true, addRandomSuffix: false, contentType });
+    } catch (e) {
+      const msg = (e as Error).message ?? "";
+      console.error("[storage] blob put failed:", msg);
+      if (/access|private|public/i.test(msg)) throw new HttpError(500, "The Vercel Blob store must be created with Private access. Create a new Private Blob store, connect it to the project and redeploy.");
+      if (/token|unauthori[sz]ed|forbidden/i.test(msg)) throw new HttpError(500, "BLOB_READ_WRITE_TOKEN is missing or invalid. Reconnect the Blob store to the project and redeploy.");
+      throw new HttpError(500, "Couldn't save the file to Vercel Blob storage. Check the Blob store in your Vercel project.");
+    }
   }
 
   async readFile(key: string): Promise<StoredFile | null> {
@@ -168,6 +177,8 @@ let instance: Storage | null = null;
 export function getStorage(): Storage {
   if (!instance) {
     const cfg = getConfig();
+    // Vercel's filesystem is read-only: without a Blob store every save/upload would crash with a bare 500.
+    if (cfg.driver === "fs" && cfg.onVercel) throw new HttpError(503, "Storage isn't set up on Vercel. Create a Blob store (Storage → Create → Blob, Private) and connect it to this project so BLOB_READ_WRITE_TOKEN is set, then redeploy.");
     instance = cfg.driver === "blob" ? new BlobStorage() : new FsStorage(cfg.dataDir);
   }
   return instance;
