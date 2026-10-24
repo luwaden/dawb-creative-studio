@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { isLocalImage, resolveLocalImage } from "@/lib/client/localImages";
 
 /**
  * Shared image cache for canvas rendering. Every image used on a canvas is loaded
@@ -17,6 +18,27 @@ export function loadImage(src: string): Promise<HTMLImageElement> {
   const inflight = pending.get(src);
   if (inflight) return inflight;
   const p = new Promise<HTMLImageElement>((resolve, reject) => {
+    const fail = () => {
+      pending.delete(src);
+      failed.add(src);
+      reject(new Error(`Could not load image: ${src.slice(0, 120)}`));
+    };
+    // Device-only photos live in IndexedDB; turn the reference into a blob: URL first.
+    if (isLocalImage(src)) {
+      resolveLocalImage(src).then((url) => {
+        if (!url) return fail();
+        const img = new window.Image();
+        img.onload = () => {
+          loaded.set(src, img);
+          pending.delete(src);
+          failed.delete(src);
+          resolve(img);
+        };
+        img.onerror = fail;
+        img.src = url;
+      }, fail);
+      return;
+    }
     const img = new window.Image();
     // Same-origin in practice (assets are proxied), but keep canvases untainted if a CDN URL slips in.
     if (/^https?:/i.test(src) && !src.startsWith(window.location.origin)) img.crossOrigin = "anonymous";

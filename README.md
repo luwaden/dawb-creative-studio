@@ -18,6 +18,7 @@ An internal design and video studio for DAWB Learn: Canva-style editing for caro
 - **Texture system:** film grain, dot grids, halftone, topographic contours, dotted orbits/lines, glow, gradients and outlined type, in both the design editor and video scenes.
 - **Brand type:** Nunito Sans and Nunito (self-hosted), plus a curated set of professional, open-licence fonts: Inter, Manrope, DM Sans, Plus Jakarta Sans, IBM Plex Sans, Space Grotesk, Fraunces, Source Serif 4, Playfair Display, Instrument Serif, Cormorant Garamond, JetBrains Mono and IBM Plex Mono. Font menus are grouped (sans / serif / mono) and the Brand page says what each is for.
 - **QR codes and charts in the editor:** *Add → QR code* encodes any link as sharp vector squares; *Add → Chart / Pie / Map* and the chart panel cover all nine chart types, value suffixes (%, k), gridlines and waterfall totals.
+- **“Use on this device only” photos:** in the design editor's image picker, a photo can stay in your browser instead of being uploaded. It works for editing and PNG/JPEG export on that device; on other devices the slot shows as empty, and it isn't used in server video renders.
 - **Design editor**: drag, resize, rotate, snap guides, edit text inline or in panels, fonts and colours, photo upload/replace/crop/zoom, shapes, textures, charts, layer order, duplicate, lock, undo/redo, multiple slides, PNG/JPEG export (1× or 2×), and all slides as a ZIP.
 - **Video studio**: a live Remotion preview, a scene timeline (reorder, duplicate, delete, add), per-scene content, duration, transitions, camera motion and textures, aspect presets (9:16, 4:5, 1:1, 16:9), theme colours and fonts, background music, and MP4/WebM export.
 - **Projects**: save, autosave, reopen, duplicate, favourite, delete, conflict protection between teammates, and export history.
@@ -58,7 +59,7 @@ The shared workspace stores projects and uploads in a **private Vercel Blob stor
 ### 2.1 Create the services (one-off)
 
 1. **Vercel project**: import the repository at vercel.com → *Add New → Project*. The framework is detected as Next.js.
-2. **Blob store**: in the Vercel project, open *Storage → Create → Blob*, choose **Private** access, and connect it to the project. This adds `BLOB_READ_WRITE_TOKEN` automatically.
+2. **Storage — Cloudinary (recommended)**: create a free account at cloudinary.com, open *Settings → API Keys* and copy the **API environment variable** (`cloudinary://<key>:<secret>@<cloud>`). Add it in Vercel as `CLOUDINARY_URL`. Projects, thumbnails and uploads are stored as **private** files under the `dawb-studio` folder; the app streams them only to signed-in team members. (Free plan: raw files up to 10 MB; Admin API 500 calls/hour — listings are cached for 15 s.) *Alternative:* a Private Vercel Blob store (`BLOB_READ_WRITE_TOKEN`).
 3. **Google OAuth client**: in Google Cloud Console, open *APIs & Services → Credentials → Create credentials → OAuth client ID → Web application*.
    - Authorised JavaScript origin: `https://<your-domain>`
    - Authorised redirect URI: `https://<your-domain>/api/auth/callback/google`
@@ -68,7 +69,8 @@ The shared workspace stores projects and uploads in a **private Vercel Blob stor
 
 | Variable | Example | Notes |
 |---|---|---|
-| `BLOB_READ_WRITE_TOKEN` | *(added by Vercel)* | Turns on the shared workspace |
+| `CLOUDINARY_URL` | `cloudinary://123:abc@dawb` | Turns on the shared workspace (Cloudinary storage) |
+| `BLOB_READ_WRITE_TOKEN` | *(added by Vercel)* | Alternative storage: Vercel Blob |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | from Google Cloud | Required in shared mode |
 | `NEXTAUTH_SECRET` | `openssl rand -base64 32` | Session encryption and asset signing |
 | `NEXTAUTH_URL` | `https://studio.dawblearn.org` | Your public URL |

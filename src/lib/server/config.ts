@@ -7,14 +7,14 @@ import path from "node:path";
  *  Workspace     Storage driver   Who can use it
  *  -----------   --------------   ------------------------------------------------
  *  local         fs  (./data)     Whoever opens the app on this computer
- *  shared        blob (Vercel)    Signed-in Google accounts on the allowlist only
+ *  shared        cloudinary/blob  Signed-in Google accounts on the allowlist only
  *
  * The workspace label is derived from the storage driver so local and shared data
  * are never silently mixed: a PC only joins the shared workspace when it is given
  * the Blob token *and* Google sign-in is configured.
  */
 
-export type StorageDriverName = "fs" | "blob";
+export type StorageDriverName = "fs" | "blob" | "cloudinary";
 
 function list(v: string | undefined): string[] {
   return (v ?? "")
@@ -24,9 +24,18 @@ function list(v: string | undefined): string[] {
 }
 
 export function getConfig() {
+  const hasCloudinary = Boolean(process.env.CLOUDINARY_URL || (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET));
+  const explicit = process.env.STORAGE_DRIVER;
   const driver: StorageDriverName =
-    process.env.STORAGE_DRIVER === "blob" || (!process.env.STORAGE_DRIVER && process.env.BLOB_READ_WRITE_TOKEN) ? "blob" : "fs";
-  const workspace = driver === "blob" ? "shared" : "local";
+    explicit === "cloudinary" || explicit === "blob" || explicit === "fs"
+      ? explicit
+      : hasCloudinary
+        ? "cloudinary"
+        : process.env.BLOB_READ_WRITE_TOKEN
+          ? "blob"
+          : "fs";
+  // Any cloud store is the shared workspace (sign-in required); local disk is this computer only.
+  const workspace = driver === "fs" ? "local" : "shared";
   const googleConfigured = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.NEXTAUTH_SECRET);
   const allowedDomains = list(process.env.ALLOWED_EMAIL_DOMAINS);
   const allowedEmails = list(process.env.ALLOWED_EMAILS);

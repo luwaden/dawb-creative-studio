@@ -5,6 +5,7 @@ import { createReadStream } from "node:fs";
 import path from "node:path";
 import { Readable } from "node:stream";
 import { getConfig } from "./config";
+import { CloudinaryStorage, cloudinaryConfig } from "./cloudinary";
 
 export interface StoredFile {
   body: ReadableStream<Uint8Array>;
@@ -178,8 +179,12 @@ export function getStorage(): Storage {
   if (!instance) {
     const cfg = getConfig();
     // Vercel's filesystem is read-only: without a Blob store every save/upload would crash with a bare 500.
-    if (cfg.driver === "fs" && cfg.onVercel) throw new HttpError(503, "Storage isn't set up on Vercel. Create a Blob store (Storage → Create → Blob, Private) and connect it to this project so BLOB_READ_WRITE_TOKEN is set, then redeploy.");
-    instance = cfg.driver === "blob" ? new BlobStorage() : new FsStorage(cfg.dataDir);
+    if (cfg.driver === "fs" && cfg.onVercel) throw new HttpError(503, "Storage isn't set up on Vercel. Add CLOUDINARY_URL (Cloudinary dashboard → API Keys) in Vercel → Settings → Environment Variables, then redeploy.");
+    if (cfg.driver === "cloudinary") {
+      const c = cloudinaryConfig();
+      if (!c) throw new HttpError(503, "Cloudinary is selected but not configured. Set CLOUDINARY_URL=cloudinary://<api_key>:<api_secret>@<cloud_name>.");
+      instance = new CloudinaryStorage(c, (key) => MIME_BY_EXT[path.extname(key).toLowerCase()] ?? "application/octet-stream");
+    } else instance = cfg.driver === "blob" ? new BlobStorage() : new FsStorage(cfg.dataDir);
   }
   return instance;
 }

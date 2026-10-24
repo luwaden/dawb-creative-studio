@@ -294,7 +294,7 @@ export function DesignEditor({ initialDoc, initialMeta, templateId, initialName 
         </div>
       )}
 
-      <AssetPicker open={Boolean(picker)} onClose={() => setPicker(null)} preferLogos={picker?.logo} onPick={(a) => onPick(a.url)} />
+      <AssetPicker open={Boolean(picker)} onClose={() => setPicker(null)} preferLogos={picker?.logo} allowLocal onPick={(a) => onPick(a.url)} />
       <ExportDialog open={exportOpen} onClose={() => setExportOpen(false)} doc={doc} pageIndex={pageIndex} name={name} onExported={saver.recordExport} />
       <Toaster />
     </div>

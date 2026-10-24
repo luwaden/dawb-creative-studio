@@ -8,6 +8,7 @@ import {
 import type { ChartElement, DesignDoc, DesignElement, ImageElement, PageView, PatternElement, QrElement, ShapeElement, TextElement } from "@/lib/design/types";
 import { resolveColor } from "@/lib/design/types";
 import { FONTS, FONT_GROUPS, nearestWeight } from "@/lib/fonts";
+import { SmartImg } from "@/components/assets/SmartImg";
 import { Button, cx, Field, IconButton, Input, Select, TextArea } from "@/components/ui";
 
 // ─────────────── shared controls ───────────────
@@ -337,10 +338,10 @@ export function QuickEdit({ doc, pageIndex, onText, onQr, onPalette, onPickImage
           ) : el.type === "image" ? (
             <div key={el.id} className="flex items-center justify-between gap-3 rounded-md border border-line p-2">
               <div className="flex min-w-0 items-center gap-2">
-                <div className="checker h-10 w-10 shrink-0 overflow-hidden rounded">{el.src && <img src={el.src} alt="" className="h-full w-full object-cover" />}</div>
+                <div className="checker h-10 w-10 shrink-0 overflow-hidden rounded">{el.src && <SmartImg src={el.src} alt="" className="h-full w-full object-cover" />}</div>
                 <div className="min-w-0">
                   <p className="truncate text-xs font-medium">{el.label}</p>
-                  <p className="truncate text-[11px] text-muted">{el.src ? "Image set" : el.hint ?? "Empty"}</p>
+                  <p className="truncate text-[11px] text-muted">{el.src ? (el.src.startsWith("local:") ? "On this device only" : "Image set") : el.hint ?? "Empty"}</p>
                 </div>
               </div>
               <Button size="sm" onClick={() => onPickImage(el.id)}>{el.src ? "Replace" : "Add"}</Button>

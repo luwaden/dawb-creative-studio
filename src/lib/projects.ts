@@ -60,7 +60,7 @@ export interface AssetMeta {
 
 export interface WorkspaceInfo {
   workspace: "local" | "shared";
-  driver: "fs" | "blob";
+  driver: "fs" | "blob" | "cloudinary";
   authRequired: boolean;
   googleConfigured: boolean;
   serverRender: boolean;

@@ -1,11 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Upload } from "lucide-react";
+import { Smartphone, Upload } from "lucide-react";
 import type { AssetMeta } from "@/lib/projects";
 import { BRAND_LOGOS, BUILTIN_MUSIC } from "@/lib/projects";
 import { api } from "@/lib/client/api";
 import { markAssetUsed, uploadAsset } from "@/lib/client/upload";
+import { saveLocalImage } from "@/lib/client/localImages";
 import { Button, cx, Modal, Spinner, toast } from "@/components/ui";
 
 export interface PickedAsset {
@@ -18,10 +19,23 @@ export interface PickedAsset {
  * Pick an image (or audio) for a slot: official brand logos, uploaded team assets,
  * or a new upload. Calls onPick with a same-origin URL.
  */
-export function AssetPicker({ open, onClose, onPick, mode = "image", preferLogos }: { open: boolean; onClose: () => void; onPick: (a: PickedAsset) => void; mode?: "image" | "audio"; preferLogos?: boolean }) {
+export function AssetPicker({ open, onClose, onPick, mode = "image", preferLogos, allowLocal }: { open: boolean; onClose: () => void; onPick: (a: PickedAsset) => void; mode?: "image" | "audio"; preferLogos?: boolean; allowLocal?: boolean }) {
   const [assets, setAssets] = useState<AssetMeta[] | null>(null);
   const [uploading, setUploading] = useState(false);
   const input = useRef<HTMLInputElement>(null);
+  const localInput = useRef<HTMLInputElement>(null);
+
+  const onLocalFile = async (file: File | undefined) => {
+    if (!file) return;
+    try {
+      const saved = await saveLocalImage(file);
+      toast("Saved on this device only — it won't be uploaded", "success");
+      onPick(saved);
+      onClose();
+    } catch (e) {
+      toast((e as Error).message, "error");
+    }
+  };
 
   const load = useCallback(() => {
     api<{ assets: AssetMeta[] }>(`/api/assets${mode === "audio" ? "?kind=audio" : ""}`)
@@ -64,10 +78,21 @@ export function AssetPicker({ open, onClose, onPick, mode = "image", preferLogos
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm text-muted">{mode === "audio" ? "MP3, WAV, M4A or OGG." : "PNG, JPEG or WebP. Large photos are resized to 2560 px."}</p>
         <input ref={input} type="file" hidden accept={mode === "audio" ? "audio/*" : "image/png,image/jpeg,image/webp"} onChange={(e) => onFile(e.target.files?.[0])} />
-        <Button variant="primary" size="sm" icon={uploading ? <Spinner size={14} /> : <Upload size={14} />} disabled={uploading} onClick={() => input.current?.click()}>
-          Upload
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          {allowLocal && mode === "image" && (
+            <>
+              <input ref={localInput} type="file" hidden accept="image/png,image/jpeg,image/webp" onChange={(e) => { void onLocalFile(e.target.files?.[0]); e.target.value = ""; }} />
+              <Button size="sm" icon={<Smartphone size={14} />} onClick={() => localInput.current?.click()} title="Keeps the photo in this browser. Works for editing and PNG/JPEG export on this device; not shared with the team or used in server video renders.">
+                Use on this device only
+              </Button>
+            </>
+          )}
+          <Button variant="primary" size="sm" icon={uploading ? <Spinner size={14} /> : <Upload size={14} />} disabled={uploading} onClick={() => input.current?.click()}>
+            Upload
+          </Button>
+        </div>
       </div>
+      {allowLocal && mode === "image" && <p className="mt-2 text-[11px] text-muted">“Use on this device only” keeps the photo in this browser — nothing is uploaded. It works for editing and PNG/JPEG export here; on other devices the slot shows as empty.</p>}
 
       {logos.length > 0 && (
         <section className="mt-5">
