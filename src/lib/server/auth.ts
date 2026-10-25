@@ -2,6 +2,8 @@ import "server-only";
 import type { NextAuthOptions } from "next-auth";
 import { getServerSession } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { checkPassword, findStudioUser } from "./users";
 import { getToken } from "next-auth/jwt";
 import { getConfig } from "./config";
 
@@ -16,6 +18,7 @@ export function isEmailAllowed(email: string | null | undefined, cfg = getConfig
   if (!email) return false;
   const e = email.toLowerCase();
   if (cfg.allowedEmails.includes(e)) return true;
+  if (findStudioUser(e)) return true;
   const domain = e.split("@")[1] ?? "";
   if (cfg.allowedDomains.includes(domain)) return true;
   // No allowlist configured = nobody gets in. The shared workspace must never be open by accident.
@@ -27,7 +30,22 @@ export function buildAuthOptions(): NextAuthOptions {
   return {
     secret: process.env.NEXTAUTH_SECRET,
     session: { strategy: "jwt", maxAge: 60 * 60 * 24 * 14 },
-    providers: cfg.googleConfigured
+    providers: [
+      ...(cfg.passwordConfigured
+        ? [
+            CredentialsProvider({
+              id: "password",
+              name: "Email and password",
+              credentials: { email: { label: "Email", type: "email" }, password: { label: "Password", type: "password" } },
+              async authorize(c) {
+                if (!c?.email || !c.password || c.password.length > 200) return null;
+                const u = checkPassword(c.email, c.password);
+                return u ? { id: u.email, email: u.email, name: u.name } : null;
+              },
+            }),
+          ]
+        : []),
+      ...(cfg.googleConfigured
       ? [
           GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -38,10 +56,12 @@ export function buildAuthOptions(): NextAuthOptions {
               : {}),
           }),
         ]
-      : [],
+      : []),
+    ],
     pages: { signIn: "/signin", error: "/signin" },
     callbacks: {
-      async signIn({ profile, user }) {
+      async signIn({ profile, user, account }) {
+        if (account?.provider === "password") return Boolean(findStudioUser(user?.email));
         const email = (profile as { email?: string; email_verified?: boolean } | undefined)?.email ?? user?.email;
         const verified = (profile as { email_verified?: boolean } | undefined)?.email_verified !== false;
         return verified && isEmailAllowed(email);
@@ -67,7 +87,7 @@ export function buildAuthOptions(): NextAuthOptions {
         // Bounded so a slow Sheets API never holds up sign-in.
         await Promise.race([
           recordSignIn(
-            { email, name: user?.name, image: user?.image, isAdmin: getConfig().adminEmails.includes(email) },
+            { email, name: user?.name, image: user?.image, isAdmin: getConfig().adminEmails.includes(email) || findStudioUser(email)?.role === "admin" },
             account ? { accessToken: account.access_token, refreshToken: account.refresh_token, expiresAt: account.expires_at, email } : null,
           ),
           new Promise((r) => setTimeout(r, 4000)),
@@ -88,13 +108,13 @@ const LOCAL_USER: AppUser = { email: "local@this-computer", name: "Local user", 
 export async function getCurrentUser(): Promise<AppUser | null> {
   const cfg = getConfig();
   if (!cfg.authRequired) {
-    if (!cfg.googleConfigured) return LOCAL_USER;
+    if (!cfg.loginConfigured) return LOCAL_USER;
     const session = await getServerSession(buildAuthOptions()).catch(() => null);
     const email = session?.user?.email;
     if (email && isEmailAllowed(email, cfg)) return toUser(email, session?.user?.name, session?.user?.image, cfg);
     return LOCAL_USER;
   }
-  if (!cfg.googleConfigured) return null;
+  if (!cfg.loginConfigured) return null;
   const session = await getServerSession(buildAuthOptions()).catch(() => null);
   const email = session?.user?.email;
   if (!email || !isEmailAllowed(email, cfg)) return null;
@@ -102,7 +122,8 @@ export async function getCurrentUser(): Promise<AppUser | null> {
 }
 
 function toUser(email: string, name: string | null | undefined, image: string | null | undefined, cfg = getConfig()): AppUser {
-  return { email: email.toLowerCase(), name: name || email.split("@")[0], image, isAdmin: cfg.adminEmails.includes(email.toLowerCase()) };
+  const seeded = findStudioUser(email);
+  return { email: email.toLowerCase(), name: name || seeded?.name || email.split("@")[0], image, isAdmin: cfg.adminEmails.includes(email.toLowerCase()) || seeded?.role === "admin" };
 }
 
 export class HttpError extends Error {
@@ -121,8 +142,8 @@ export async function getUserGoogleTokens(req: Request): Promise<{ accessToken?:
 
 export async function requireUser(): Promise<AppUser> {
   const cfg = getConfig();
-  if (cfg.authRequired && !cfg.googleConfigured) {
-    throw new HttpError(503, "The shared workspace needs Google sign-in configured (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, NEXTAUTH_SECRET).");
+  if (cfg.authRequired && !cfg.loginConfigured) {
+    throw new HttpError(503, "The shared workspace needs sign-in configured: NEXTAUTH_SECRET plus STUDIO_USERS (email + password) and/or Google (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET).");
   }
   const user = await getCurrentUser();
   if (!user) throw new HttpError(401, "Please sign in with an approved DAWB Google account.");

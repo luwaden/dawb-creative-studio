@@ -94,7 +94,20 @@ Put the shared variables (Blob token, Google credentials, allowlist) in `.env.lo
 
 ---
 
-## 3. Google Sheets (trainees, speakers, lessons)
+## 3. Sign-in (team members only)
+
+Only DAWB team members sign in. Two methods — use either or both:
+
+**Email + password (seeded users, recommended to start).**
+1. On a PC with the project: `npm run user:add -- ada@dawblearn.org "Ada Obi" admin` — prints a `STUDIO_USERS` entry and a generated password (or add your own password as a 4th argument, min. 10 characters).
+2. Put the entries in `STUDIO_USERS` (Vercel → Environment Variables, or `.env.local`), separated by `;`, and set `NEXTAUTH_SECRET` (any random 32+ characters). Redeploy/restart.
+3. Sign in at `/signin`. Only a salted scrypt hash is stored; 5 wrong passwords lock that email for 15 minutes. To remove someone, delete their entry and redeploy. `admin` users can prepare the spreadsheet, see the Users tab and run the System check.
+
+**Google.** As in section 2.1 step 3, plus your email in `ALLOWED_EMAILS` (or domain in `ALLOWED_EMAIL_DOMAINS`) and, for External apps, as a *Test user* on the OAuth consent screen. The sign-in page now says why a Google login failed (not approved, redirect URI, misconfiguration).
+
+---
+
+## 4. Google Sheets (trainees, speakers, lessons)
 
 1. Create a Google Sheet (it can be empty) and copy its link.
 2. In Google Cloud Console (the project that holds your OAuth client): *APIs & Services → Library → Google Sheets API → Enable*.
@@ -111,7 +124,7 @@ Put the shared variables (Blob token, Google credentials, allowlist) in `.env.lo
 
 ---
 
-## 4. How it works
+## 5. How it works
 
 ```
 src/
@@ -140,11 +153,15 @@ src/
 
 ---
 
-## 5. Checks
+## 6. Testing
+
+**One command for everything:** `npm run test:all` — type check, unit tests, production build, then three browser tests (sign-in, Google Sheets workflow against a fake Sheets API, editor + PNG/ZIP/video exports) and a ✔/✘ summary. First time only: `npx playwright install chromium`.
+
+**On a live deployment:** sign in as an admin and open **System check** in the sidebar — it writes, reads and deletes a test file in your storage (Cloudinary/Blob/disk), checks sign-in, Google Sheets and video export, and tells you exactly what to fix.
 
 ```bash
 npm run typecheck      # TypeScript
-npm test               # 212 unit tests (incl. Sheets client against a fake API): every template validates; storage, permissions, conflicts, sniffing, allowlist, timeline
+npm test               # 219 unit tests (incl. Sheets client against a fake API): every template validates; storage, permissions, conflicts, sniffing, allowlist, timeline
 npm run build          # production build
 npm run render:test    # server-render the sample composition → out/render-test.mp4
 npx tsx scripts/render-template.ts logo-assemble v-btd-promo   # render any video template → out/<id>.mp4
@@ -154,7 +171,7 @@ npm run test:e2e:sheets  # after npm run build: starts the app + a fake Sheets A
 
 ---
 
-## 6. Notes and limitations
+## 7. Notes and limitations
 
 - **Sample content.** Chart figures, names ("Member Name"), dates ("00 Month"), fees ("₦00,000") and "[your form link]" are placeholders. Each chart template carries a *Data note / source* field to replace with the real source. QR codes default to www.dawblearn.org until you paste the form link into the *Questionnaire link* field; test-scan every exported flyer.
 - **Photos.** The calendar asks for photography and historical illustrations that weren't supplied, so photo slots are marked placeholders showing the calendar's suggested image (for example “Ishango Bone photo”). Upload real images in *Brand assets* or straight into a slot. Bracketed fields such as `[Graduate Name]` and `X%` come from the calendar and must be replaced with real details.

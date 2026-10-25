@@ -7,7 +7,7 @@ import { getConfig } from "./config";
 export async function requirePageAccess() {
   const cfg = getConfig();
   if (!cfg.authRequired) return;
-  if (!cfg.googleConfigured) redirect("/signin?reason=not-configured");
+  if (!cfg.loginConfigured) redirect("/signin?reason=not-configured");
   const user = await getCurrentUser();
   if (!user) redirect("/signin");
 }

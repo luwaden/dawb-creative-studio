@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export const GET = route(async () => {
   const cfg = getConfig();
-  const user = cfg.authRequired && !cfg.googleConfigured ? null : await getCurrentUser();
+  const user = cfg.authRequired && !cfg.loginConfigured ? null : await getCurrentUser();
   const info: WorkspaceInfo = {
     workspace: cfg.workspace,
     driver: cfg.driver,

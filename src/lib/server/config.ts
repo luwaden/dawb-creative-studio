@@ -37,11 +37,14 @@ export function getConfig() {
   // Any cloud store is the shared workspace (sign-in required); local disk is this computer only.
   const workspace = driver === "fs" ? "local" : "shared";
   const googleConfigured = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.NEXTAUTH_SECRET);
+  // Seeded email + password users (STUDIO_USERS) — an alternative to Google sign-in.
+  const passwordConfigured = Boolean(process.env.NEXTAUTH_SECRET && /scrypt\$/.test(process.env.STUDIO_USERS ?? ""));
+  const loginConfigured = googleConfigured || passwordConfigured;
   const allowedDomains = list(process.env.ALLOWED_EMAIL_DOMAINS);
   const allowedEmails = list(process.env.ALLOWED_EMAILS);
   const adminEmails = list(process.env.ADMIN_EMAILS);
   // Shared data is never served without sign-in. Local mode can opt in to sign-in too.
-  const authRequired = workspace === "shared" || (googleConfigured && process.env.REQUIRE_AUTH === "true");
+  const authRequired = workspace === "shared" || (loginConfigured && process.env.REQUIRE_AUTH === "true");
   const onVercel = Boolean(process.env.VERCEL);
   const serverRender = process.env.SERVER_RENDER ? process.env.SERVER_RENDER === "true" : !onVercel;
   return {
@@ -49,6 +52,8 @@ export function getConfig() {
     workspace,
     dataDir: path.resolve(/*turbopackIgnore: true*/ process.env.DATA_DIR ?? path.join(/*turbopackIgnore: true*/ process.cwd(), "data")),
     googleConfigured,
+    passwordConfigured,
+    loginConfigured,
     authRequired,
     allowedDomains,
     allowedEmails,

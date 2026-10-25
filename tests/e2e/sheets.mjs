@@ -24,8 +24,11 @@ const env = {
   SHEETS_API_BASE: "http://localhost:4010",
   GOOGLE_TOKEN_URL: "http://localhost:4010/token",
   DATA_DIR: `/tmp/dawb-sheets-e2e-${Date.now()}`,
+  STORAGE_DRIVER: "fs",
+  REQUIRE_AUTH: "false",
 };
-const app = spawn("npx", ["next", "start", "-p", String(PORT)], { env, stdio: ["ignore", "pipe", "pipe"] });
+const stopApp = () => { try { process.platform === "win32" ? app.kill() : process.kill(-app.pid, "SIGTERM"); } catch {} };
+const app = spawn("npx", ["next", "start", "-p", String(PORT)], { detached: process.platform !== "win32",  env, stdio: ["ignore", "pipe", "pipe"] });
 let appLog = "";
 app.stdout.on("data", (d) => (appLog += d));
 app.stderr.on("data", (d) => (appLog += d));
@@ -128,9 +131,10 @@ try {
   const post = (tab, body) => page.request.post(`${BASE}/api/sheets/${tab}`, { data: body, headers: { origin: BASE } });
   await post("lessons", { tool: "Excel", function_name: "SUM", topic: "Add up numbers", what_it_does: "Adds numbers.", syntax: "=SUM(number1, …)", arguments: "number1: first", example_table: "Month | Sales\nJan | 1200\nFeb | 850", example_formula: "=SUM(B2:B3)", result_cell: "B4", example_result: "2050", tip: "Text is skipped.", status: "Ready" });
   await post("speakers", { name: "Dr Kemi Bello", role: "Data Lead", organisation: "Acme", bio: "Builds dashboards.", expertise: "Power BI, SQL", webinar_title: "Dashboards That Decide", webinar_date: "Sat, 14 Nov", webinar_time: "4 PM WAT", platform: "Google Meet" });
-  for (const [tabLabel, templateName, expect] of [["Class lessons", "Class Carousel — Excel SUM", "2,050"], ["Speakers", "Speaker Profile — Editorial (White)", "Dr Kemi Bello"]]) {
+  for (const [tabLabel, templateName, expect, rowText] of [["Class lessons", "Class Carousel — Excel SUM", "2,050", "Add up numbers"], ["Speakers", "Speaker Profile — Editorial (White)", "Dr Kemi Bello", "Dashboards That Decide"]]) {
     await page.getByRole("button", { name: tabLabel, exact: true }).click();
-    await page.waitForLoadState("networkidle");
+    // Wait for this tab's rows before selecting (the list reloads on tab change).
+    await page.getByRole("cell", { name: rowText }).waitFor({ timeout: 20000 });
     await page.getByRole("checkbox", { name: "Select all" }).check();
     await page.getByRole("button", { name: "Generate content" }).click();
     const d = page.locator('[role="dialog"]');
@@ -158,7 +162,7 @@ try {
   results.push(false);
 } finally {
   await browser?.close();
-  app.kill("SIGTERM");
+  stopApp();
   fakeServer.close();
 }
 const passed = results.filter(Boolean).length;
