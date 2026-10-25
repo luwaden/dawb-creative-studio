@@ -163,3 +163,5 @@ npm run test:e2e:sheets  # after npm run build: starts the app + a fake Sheets A
 - **Remotion licence.** Remotion is free for individuals and companies with up to 3 employees; larger organisations need a company licence from remotion.pro. Check this applies to DAWB before wide use.
 - **Sheets sync is on demand.** The Data page reads the sheet when you open a tab or press Refresh; generated projects are snapshots (re-generate after editing a row).
 - **Not yet built:** real-time co-editing (saves are protected by conflict detection instead), AI-assisted copy and imagery (the app works fully without AI), desktop installer packaging, Google Drive/Sheets integration.
+#   d a w b - c r e a t i v e - s t u d i o  
+ 
